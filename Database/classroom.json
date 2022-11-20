@@ -1,0 +1,31 @@
+{
+	"classroom": {
+		"158": {
+			"max_people": 32,
+			"main_subjects": [
+				"polish"
+			]
+		},
+		"202": {
+			"main_subjects": [
+				"english",
+				"polish"
+			],
+			"max_people": 48
+		},
+		"208": {
+			"max_people": 48,
+			"main_subjects": [
+				"polish",
+				"english",
+                "spanish"
+			]
+		},
+		"404": {
+			"max_people": 48,
+			"main_subjects": [
+				"english"
+			]
+		}
+	}
+}
