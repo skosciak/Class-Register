@@ -1,10 +1,10 @@
 import * as fs from 'fs';
-import { openFile } from './reusable';
+import { openFile, searchIfKeyExist } from './reusable';
 
 function addClassroom(number: string, main_subjects: string[], max_people?: number) {
     const open_file = 'Database/classroom.json';
     const read_file = openFile(open_file, true);
-    if (checkIfClassroomExist(number)){
+    if (searchIfKeyExist(open_file, number)){
         console.warn('Classroom exist! Could not add new classroom.');  
         return false;
     }
@@ -27,7 +27,7 @@ function addClassroom(number: string, main_subjects: string[], max_people?: numb
 function removeClassroom(number: string) {
     const open_file = 'Database/classroom.json';
     const read_file = openFile(open_file, true);
-    if (checkIfClassroomExist(number)){
+    if (searchIfKeyExist(open_file, number)){
         console.warn('Classroom does not exist!');  
         return false;
     }
@@ -43,7 +43,7 @@ function removeClassroom(number: string) {
 function modifyClassroom(number: string, main_subjects?: string[], max_people?: number) {
     const open_file = 'Database/classroom.json';
     const read_file = openFile(open_file, true);
-    if (!checkIfClassroomExist(number)){
+    if (!searchIfKeyExist(open_file, number)){
         console.warn('Could not modify non existing classroom');  
         return false;
     }
@@ -136,15 +136,4 @@ function searchClassroom(main_subjects?: string[] ,max_people?: number, number?:
     };
 
 };
-
-function checkIfClassroomExist(number: string) {
-    const open_file = 'Database/classroom.json';
-    const read_file = openFile(open_file, true);
-    for (const key in read_file.classroom) {
-        if(number === key)
-            return true;
-    };
-    return false;
-};
-
 console.log("End of file");
