@@ -1,9 +1,13 @@
 import * as fs from 'fs';
-//const fs = require('fs');
+import { openFile, searchIfKeyExist } from './reusable';
 
-function addNewSubject(sub_name: string, sub_classroom: string, mandatory: boolean, sub_lessons: number) {
+function addNewSubject(sub_name: string, sub_classroom: string, sub_lessons: number, mandatory: boolean) {
     const open_file = 'Database/subjects.json';
-    const read_file = openSubjects('Database/subjects.json', true);
+    const read_file = openFile(open_file, true);
+    if (searchIfKeyExist(open_file, sub_name) === true) {
+        console.warn(`This subject ${sub_name} already exist!`);
+        return false;
+    };
     let data = {
             "class": sub_classroom,
             "lesson_hours": sub_lessons,
@@ -12,80 +16,48 @@ function addNewSubject(sub_name: string, sub_classroom: string, mandatory: boole
     read_file.school_subjects[sub_name] = data;
     const update_file = JSON.stringify(read_file, null, 4);
     fs.writeFileSync(open_file, update_file);
+    return true;
 };
 
 function deleteSubject(sub_name: string){
     const open_file = 'Database/subjects.json';
-    const read_file = openSubjects('Database/subjects.json', true);
+    const read_file = openFile(open_file, true);
+    if (searchIfKeyExist(open_file, sub_name) === false) {
+        console.warn(`This subject ${sub_name} does not exist!`);
+        return false;
+    };
     delete read_file.school_subjects[sub_name];
     const update_file = JSON.stringify(read_file, null, 4);
     fs.writeFileSync(open_file, update_file);
+    return true;
 };
 
-function modifySubject(action: string, sub_name: string, sub_property: string, sub_value: any){
+function modifySubject(sub_name: string, sub_classroom?: string, sub_lessons?: number, mandatory?: boolean){
     const open_file = 'Database/subjects.json';
-    const read_file = openSubjects('Database/subjects.json', true);
-    let send_flag: boolean;
-    if (action === "delete") {
-        delete read_file.school_subjects[sub_name][sub_property];
-        const update_file = JSON.stringify(read_file, null, 4);
-    }
-    else if(action === "modify") {
-        switch (sub_property){
-            case "class":
-                if(typeof sub_value === "string"){
-                    read_file.school_subjects[sub_name][sub_property] = sub_value;
-                    send_flag = true;
-                    break;
-                }
-                else{
-                    console.warn(`Wrong property type. For ${sub_property} should be string`);
-                    send_flag = false;
-                    break;
-                };
-
-            case "lesson_hours":
-                if(typeof sub_value === "number"){
-                    read_file.school_subjects[sub_name][sub_property] = sub_value;
-                    send_flag = true;
-                    break;
-                }
-                else{
-                    console.warn(`Wrong property type. For ${sub_property} should be number`);
-                    send_flag = false;
-                    break;
-                };
-
-            case "mandatory":
-                if(typeof sub_value === "boolean"){
-                    read_file.school_subjects[sub_name][sub_property] = sub_value;
-                    send_flag = true;
-                    break;
-                }
-                else{
-                    console.warn(`Wrong property type. For ${sub_property} should be true/false`);
-                    send_flag = false;
-                    break;
-                };
-        };
-        if (send_flag === true){
-            const update_file = JSON.stringify(read_file, null, 4);
-            fs.writeFileSync(open_file, update_file);
-        };
+    const read_file = openFile(open_file, true);
+    if (searchIfKeyExist(open_file, sub_name) === false) {
+        console.warn(`This subject ${sub_name} does not exist! Cannot modify`);
+        return false;
     };
+    let data = {
+        "class": sub_classroom,
+        "lesson_hours": sub_lessons,
+        "mandatory": mandatory
+    };
+    for (const key of Object.keys(data)) {
+        if (data[key] === undefined || null)
+            delete data[key];
+    };
+    if ((Object.keys(data)).length === 0){
+        console.warn("No values to modify!");
+        return false;
+    };
+    for (const key of Object.keys(data))  {
+        read_file.school_subjects[sub_name][key] = data[key];
+    };
+    const update_file = JSON.stringify(read_file, null, 4);
+    fs.writeFileSync(open_file, update_file);
+    return true;
 };
 
-function openSubjects(file_name: string, return_value: boolean) {
-    const file = fs.readFileSync(file_name, "utf-8");
-    const loaded_file = JSON.parse(file);
-    console.log(loaded_file);
-    if (return_value === true) {
-        return loaded_file;
-    };
-};
-
-modifySubject("modify", "english", "class", "classroom 202");
-addNewSubject("swedish", "classroom 158", true, 45);
-openSubjects('Database/subjects.json', false);
-deleteSubject("polish");
-openSubjects('Database/subjects.json', false);
+console.log("End of file")
