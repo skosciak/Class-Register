@@ -1,52 +1,25 @@
 {
-    "teachers": {
-        "polish": [
-            {
-                "id": 1,
-                "name": "Adam",
-                "surname": "Kowalski",
-                "age": 47,
-                "subjects": ["polish", "english"]
-            },
-            {
-                "id": 2,
-                "name": "Joanna",
-                "surname": "Koroniewska",
-                "age": 22,
-                "subjects": ["polish"]
-            },
-            {
-                "id": 3,
-                "name": "Ewelina",
-                "surname": "Juhowska",
-                "age": 28,
-                "subjects": ["polish"]
-            }
-        ],
-        "english": [
-            {
-                "id": 1,
-                "name": "Adam",
-                "surname": "Kowalski",
-                "age": 47,
-                "subjects": ["polish", "english"]
-            }
-        ],
-        "unsorted": [
-            {
-                "id": null,
-                "name": "Monika",
-                "surname": "Herbska",
-                "age": 47,
-                "subjects": ["polish", "english"]
-            },
-            {
-                "id": null,
-                "name": "Andrzej",
-                "surname": "Łebski",
-                "age": 67,
-                "subjects": ["polish"]
-            }
-        ]
-    }
+	"teachers": {
+		"id_1": {
+			"name": "Adam",
+			"surname": "Strzelba",
+			"subjects": [
+				"Polish"
+			]
+		},
+		"id_2": {
+			"name": "Adam",
+			"surname": "Strzelba",
+			"subjects": [
+				"Polish"
+			]
+		},
+		"id_3": {
+			"name": "cazary",
+			"surname": "łopiński",
+			"subjects": [
+				"math"
+			]
+		}
+	}
 }
