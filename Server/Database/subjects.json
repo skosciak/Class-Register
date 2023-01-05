@@ -1,0 +1,14 @@
+{
+    "school_subjects": {
+        "english": {
+            "class": "classroom 202",
+            "lesson_hours": 22,
+            "mandatory": true
+        },
+        "swedish": {
+            "class": "classroom 158",
+            "lesson_hours": 45,
+            "mandatory": true
+        }
+    }
+}

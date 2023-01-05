@@ -1,15 +1,13 @@
 import * as fs from 'fs';
-import { openFile, searchIfKeyExist } from './reusable';
+import { openFile, searchIfKeyExist } from './reusable.js';
 
-function addNewTeacher (name: string, surname: string, subjects: string[], age?: number) {
+export function addNewTeacher (name: string, surname: string, subjects: string[], age?: number) {
     if ((name === (null || undefined)) || (surname === (null || undefined)) || (subjects.length === 0)) {
         console.warn("Name, surname and at least one subject is mandatory!!!");
         return false;
     };
-    const open_file = 'Database/teachers.json';
+    const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
-    let count_matches: number = 0;
-    let match: object[] = [];
     const new_teacher = {
         "name": name.toLowerCase(),
         "surname": surname.toLowerCase(),
@@ -18,31 +16,14 @@ function addNewTeacher (name: string, surname: string, subjects: string[], age?:
     };
     if (age === (null || undefined))
         delete new_teacher.age;
-    for (const id in read_file.teachers) {
-        for (const new_key in new_teacher) {
-            console.log(read_file.teachers[id][new_key], new_teacher[new_key]);
-            if (read_file.teachers[id][new_key] === new_teacher[new_key])
-                count_matches++;
-        };
-        if (count_matches >= 2){
-            match[match.length] = {
-                'id': id
-            };
-        };
-        count_matches = 0;
-    };
-    if(match.length > 0){
-        console.warn(`Found teacher that match keywords at ${match}`);
-        return false;
-    };
     read_file.teachers[returnFirstFreeID()] = new_teacher;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
     return true;
 };
 
-function returnFirstFreeID() {
-    const open_file = 'Database/teachers.json';
+export function returnFirstFreeID() {
+    const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     let last_id: number = 0;
     let id: number = 0;
@@ -58,12 +39,19 @@ function returnFirstFreeID() {
     }
 };
 
-function removeTeacher (id: Object | string){
+export function removeTeacher (id: Object | string | false){
     if (((Object.keys(id)).length !== 1) && typeof id !== "string") {
-        console.warn("Returned more than one teacher matching search result! Please specify more information for search!");
-        return false;
+        console.warn(`Returned more than one teacher matching search result! Please specify more information for search!`);
+        return {
+            status: false,
+            id: id
+        };
     }
-    const open_file = 'Database/teachers.json';
+    else if (id === false){
+        console.warn("Error occured!")
+        return false;
+    };
+    const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     if (!searchIfKeyExist(open_file, id[0].id || id)) {
         console.warn(`Teacher with this id ${id[0].id} does not exist`);
@@ -77,9 +65,10 @@ function removeTeacher (id: Object | string){
     }
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
+    return true;
 }
 
-function modifyTeacher (id: Object, name?: string, surname?: string, age?: number, subjects?: string[]) {
+export function modifyTeacher (id: Object, name?: string, surname?: string, age?: number, subjects?: string[]) {
     let teacher = {
         "name": name,
         "surname": surname,
@@ -98,7 +87,7 @@ function modifyTeacher (id: Object, name?: string, surname?: string, age?: numbe
         console.warn("Returned more than one teacher matching search result! Please specify more information for search!");
         return false;
     };
-    const open_file = 'Database/teachers.json';
+    const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     if (id !== undefined || null) {
         for (const key in teacher) {
@@ -109,14 +98,18 @@ function modifyTeacher (id: Object, name?: string, surname?: string, age?: numbe
     fs.writeFileSync(open_file, update_file);
 };
 
-function searchTeacher(name?: string, surname?: string, age?: number, subjects?: string[]) {
+export function searchTeacher(name?: string, surname?: string, age?: number, subjects?: string[] | String) {
     let teacher = {
         "name": name,
         "surname": surname,
         "age": age,
         "subjects": subjects
     };
-    const open_file = 'Database/teachers.json';
+
+    if (teacher.age)
+        teacher.age = parseInt(String(age));
+        
+    const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     for (const [key, value] of Object.entries(teacher)) {
         if (value === undefined || null)
@@ -157,15 +150,23 @@ function searchTeacher(name?: string, surname?: string, age?: number, subjects?:
             }
             else {
                 for (const subject of read_file.teachers[id].subjects) {
-                    for (const search_subject of teacher.subjects) {
-                        if (subject === search_subject)
-                            count_matches++;
+                    if (typeof teacher.subjects != 'string') {
+                        for (const search_subject of teacher.subjects) {
+                            if (subject === search_subject)
+                                count_matches++;
+                        };
+                        if (count_matches === (Object.keys(subjects)).length){
+                            match[match.length] = {
+                                'id': id
+                            };
+                        };
                     };
-                    if (count_matches === (Object.keys(subjects)).length){
+                    if (subject === teacher.subjects) {
                         match[match.length] = {
                             'id': id
                         };
                     };
+                    
                 };
             };
             
@@ -175,4 +176,10 @@ function searchTeacher(name?: string, surname?: string, age?: number, subjects?:
     return match;
 };
 
-console.log("End of file");
+export function returnTeacherInfo(id: string) {
+    const open_file = './Server/Database/teachers.json';
+    const read_file = openFile(open_file, true);
+    return read_file.teachers[id];
+};
+
+console.log("Loaded teachers module");

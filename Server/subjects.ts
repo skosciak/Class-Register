@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import { openFile, searchIfKeyExist } from './reusable';
 
-function addNewSubject(sub_name: string, sub_classroom: string, sub_lessons: number, mandatory: boolean) {
-    const open_file = 'Database/subjects.json';
+export function addNewSubject(sub_name: string, sub_classroom: string, sub_lessons: number, mandatory: boolean) {
+    const open_file = './Server/Database/subjects.json';
     const read_file = openFile(open_file, true);
     if (searchIfKeyExist(open_file, sub_name) === true) {
         console.warn(`This subject ${sub_name} already exist!`);
@@ -19,8 +19,8 @@ function addNewSubject(sub_name: string, sub_classroom: string, sub_lessons: num
     return true;
 };
 
-function deleteSubject(sub_name: string){
-    const open_file = 'Database/subjects.json';
+export function deleteSubject(sub_name: string){
+    const open_file = './Server/Database/subjects.json';
     const read_file = openFile(open_file, true);
     if (searchIfKeyExist(open_file, sub_name) === false) {
         console.warn(`This subject ${sub_name} does not exist!`);
@@ -32,8 +32,8 @@ function deleteSubject(sub_name: string){
     return true;
 };
 
-function modifySubject(sub_name: string, sub_classroom?: string, sub_lessons?: number, mandatory?: boolean){
-    const open_file = 'Database/subjects.json';
+export function modifySubject(sub_name: string, sub_classroom?: string, sub_lessons?: number, mandatory?: boolean){
+    const open_file = './Server/Database/subjects.json';
     const read_file = openFile(open_file, true);
     if (searchIfKeyExist(open_file, sub_name) === false) {
         console.warn(`This subject ${sub_name} does not exist! Cannot modify`);

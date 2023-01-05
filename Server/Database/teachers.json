@@ -1,0 +1,58 @@
+{
+	"teachers": {
+		"id_1": {
+			"name": "Adam",
+			"surname": "Strzelba",
+			"subjects": [
+				"Polish"
+			]
+		},
+		"id_2": {
+			"name": "Adam",
+			"surname": "Strzelba",
+			"age": 47,
+			"subjects": [
+				"Polish"
+			]
+		},
+		"id_3": {
+			"name": "cazary",
+			"surname": "łopiński",
+			"subjects": [
+				"math"
+			]
+		},
+		"id_5": {
+			"name": "sebastian",
+			"surname": "kościak",
+			"age": 15,
+			"subjects": [
+				"angielski"
+			]
+		},
+		"id_6": {
+			"name": "arkadiusz",
+			"surname": "milik",
+			"age": 100,
+			"subjects": [
+				"francuski"
+			]
+		},
+		"id_7": {
+			"name": "sebastian",
+			"surname": "kcik",
+			"age": 80,
+			"subjects": [
+				"angielski"
+			]
+		},
+		"id_4": {
+			"name": "sebastian",
+			"surname": "kościak",
+			"age": 25,
+			"subjects": [
+				"angielski"
+			]
+		}
+	}
+}
