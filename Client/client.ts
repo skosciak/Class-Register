@@ -88,6 +88,7 @@ function switchText(database_text_change: string) {
 
     const input_wrapper = document.querySelector('#inputs') as HTMLDivElement;
     input_wrapper.style.opacity = '1';
+    input_wrapper.style.height = 'auto';
     const input = document.querySelector('#fourth-field') as HTMLInputElement;
     switch (database_text_change) {
         case 'classroom':
@@ -110,6 +111,7 @@ function switchText(database_text_change: string) {
             field.third.setAttribute('value', 'age');
             field.fourth.innerText = text_object.teachers.subjects;
             field.fourth.setAttribute('value', 'subjects');
+            field.fourth.style.display = 'block';
             input.style.display = 'block';
             break;
 
@@ -278,6 +280,23 @@ function displayResult(returnedId: any, file: string) {
             const select_p = document.getElementById(`${key}-${id}-p`) as HTMLParagraphElement;
             select_p.textContent = String(data[key as keyof returnedData]);
         };
+        list.addEventListener('click', (event) => {
+            addFromListToInputs(event);
+        });
+    };
+
+    function addFromListToInputs(event: any) {
+        const id = event.composedPath()[2].id;
+        const list = document.querySelector(`#${id}`) as HTMLUListElement;
+        const inputs = document.querySelectorAll(`.write`) as NodeListOf<HTMLInputElement>;
+        const li = list.childNodes as NodeListOf<HTMLLIElement>;
+        inputs[0].value = li[0].innerText;
+        inputs[1].value = li[1].innerText;
+        inputs[2].value = li[2].innerText;
+        try {
+            inputs[3].value = li[3].innerText;
+        } finally {};
+
     };
 
     const database: Array<returnedData> = [];

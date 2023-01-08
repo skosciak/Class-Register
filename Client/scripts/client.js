@@ -77,6 +77,7 @@ function switchText(database_text_change) {
     };
     const input_wrapper = document.querySelector('#inputs');
     input_wrapper.style.opacity = '1';
+    input_wrapper.style.height = 'auto';
     const input = document.querySelector('#fourth-field');
     switch (database_text_change) {
         case 'classroom':
@@ -98,6 +99,7 @@ function switchText(database_text_change) {
             field.third.setAttribute('value', 'age');
             field.fourth.innerText = text_object.teachers.subjects;
             field.fourth.setAttribute('value', 'subjects');
+            field.fourth.style.display = 'block';
             input.style.display = 'block';
             break;
         case 'subjects':
@@ -270,6 +272,24 @@ function displayResult(returnedId, file) {
             const select_p = document.getElementById(`${key}-${id}-p`);
             select_p.textContent = String(data[key]);
         }
+        ;
+        list.addEventListener('click', (event) => {
+            addFromListToInputs(event);
+        });
+    }
+    ;
+    function addFromListToInputs(event) {
+        const id = event.composedPath()[2].id;
+        const list = document.querySelector(`#${id}`);
+        const inputs = document.querySelectorAll(`.write`);
+        const li = list.childNodes;
+        inputs[0].value = li[0].innerText;
+        inputs[1].value = li[1].innerText;
+        inputs[2].value = li[2].innerText;
+        try {
+            inputs[3].value = li[3].innerText;
+        }
+        finally { }
         ;
     }
     ;

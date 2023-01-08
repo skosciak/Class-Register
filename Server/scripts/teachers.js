@@ -73,10 +73,10 @@ export function removeTeacher(id) {
 }
 export function modifyTeacher(id, name, surname, age, subjects) {
     let teacher = {
-        "name": name,
-        "surname": surname,
+        "name": name.toLowerCase(),
+        "surname": surname.toLowerCase(),
         "age": age,
-        "subjects": subjects
+        "subjects": subjects.map(subjects => subjects.toLowerCase())
     };
     for (const [key, value] of Object.entries(teacher)) {
         if (value === undefined || null)
@@ -107,14 +107,24 @@ export function modifyTeacher(id, name, surname, age, subjects) {
 }
 ;
 export function searchTeacher(name, surname, age, subjects) {
+    if (name != undefined) {
+        name = name.toLowerCase();
+    }
+    if (surname != undefined) {
+        surname = surname.toLowerCase();
+    }
+    if (age && (age != undefined))
+        age = parseInt(String(age));
+    if (Array.isArray(subjects) && subjects != undefined) {
+        subjects = subjects.map(subjects => subjects.toLowerCase());
+    }
+    ;
     let teacher = {
         "name": name,
         "surname": surname,
         "age": age,
         "subjects": subjects
     };
-    if (teacher.age)
-        teacher.age = parseInt(String(age));
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     for (const [key, value] of Object.entries(teacher)) {

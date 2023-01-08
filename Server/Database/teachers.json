@@ -22,14 +22,6 @@
 				"math"
 			]
 		},
-		"id_5": {
-			"name": "sebastian",
-			"surname": "kościak",
-			"age": 15,
-			"subjects": [
-				"angielski"
-			]
-		},
 		"id_6": {
 			"name": "arkadiusz",
 			"surname": "milik",

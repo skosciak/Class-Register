@@ -70,10 +70,10 @@ export function removeTeacher (id: Object | string | false){
 
 export function modifyTeacher (id: Object, name?: string, surname?: string, age?: number, subjects?: string[]) {
     let teacher = {
-        "name": name,
-        "surname": surname,
+        "name": name.toLowerCase(),
+        "surname": surname.toLowerCase(),
         "age": age,
-        "subjects": subjects
+        "subjects": subjects.map(subjects => subjects.toLowerCase())
     };
     for (const [key, value] of Object.entries(teacher)) {
         if (value === undefined || null)
@@ -98,17 +98,30 @@ export function modifyTeacher (id: Object, name?: string, surname?: string, age?
     fs.writeFileSync(open_file, update_file);
 };
 
-export function searchTeacher(name?: string, surname?: string, age?: number, subjects?: string[] | String) {
+export function searchTeacher(name?: string, surname?: string, age?: number, subjects?: string[] | string) {
+
+    if (name != undefined) {
+        name = name.toLowerCase();
+    }
+
+    if (surname != undefined) {
+        surname = surname.toLowerCase();
+    }
+
+    if (age && (age != undefined))
+        age = parseInt(String(age));
+
+    if (Array.isArray(subjects) && subjects != undefined) {
+        subjects = subjects.map(subjects => subjects.toLowerCase());
+    };
+        
     let teacher = {
         "name": name,
         "surname": surname,
         "age": age,
         "subjects": subjects
-    };
+    }
 
-    if (teacher.age)
-        teacher.age = parseInt(String(age));
-        
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     for (const [key, value] of Object.entries(teacher)) {
