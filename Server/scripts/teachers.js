@@ -49,15 +49,15 @@ export function removeTeacher(id) {
             id: id
         };
     }
-    else if (id === false) {
+    else if (typeof id !== 'object' || typeof id !== 'string') {
         console.warn("Error occured!");
         return false;
     }
     ;
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
-    if (!searchIfKeyExist(open_file, id[0].id || id)) {
-        console.warn(`Teacher with this id ${id[0].id} does not exist`);
+    if (!searchIfKeyExist(open_file, id[0]['id'] || id)) {
+        console.warn(`Teacher with this id ${id[0]['id']} does not exist`);
         return false;
     }
     ;
@@ -65,7 +65,7 @@ export function removeTeacher(id) {
         delete read_file.teachers[id];
     }
     else {
-        delete read_file.teachers[id[0].id];
+        delete read_file.teachers[id[0]['id']];
     }
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
@@ -140,6 +140,7 @@ export function searchTeacher(name, surname, age, subjects) {
     let subject_exist = 0;
     let count_matches = 0;
     const match = [];
+    //Checking if subjects are existing.
     try {
         if (subjects.length > 0) {
             subject_exist = (Object.keys(teacher)).length - 1;

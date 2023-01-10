@@ -1,12 +1,11 @@
 const base_url = 'http://localhost:5500';
 
 type input = {
-    method_checked: string,
-    database_checked: string,
+    database_checked: string | undefined,
     name: string,
     surname: string,
     age: number,
-    subjects: string[] | undefined
+    subjects: string[]
 };
 
 type short_input = {
@@ -50,11 +49,29 @@ window.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             return;
         };
-        sendRequest(input);
+        getDataFromServer(input);
         console.log(input);
         event.preventDefault();
     });
 });
+
+function saveInput() {
+    let database_checked: string = '';
+    const database: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.database'));
+    database.forEach(x => {
+        if(x.checked === true)
+            database_checked = x.value;
+    });
+    if (database_checked === ''){
+       console.warn('Did not select which database use.');
+       return false;
+    };
+    const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
+    const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
+    const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
+    const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
+    return {database_checked, name, surname, age, subjects};
+};
 
 function switchText(database_text_change: string) {
 
@@ -133,45 +150,19 @@ function switchText(database_text_change: string) {
     };
 };
 
-function saveInput() {
-    let method_checked: string = '';
-    const method: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.method'));
-    method.forEach(x => {
-        if(x.checked === true)
-            method_checked = x.value;
-    });
-    if (method_checked === ''){
-       console.warn('Did not select which method use.');
-       return false;
-    };
-    let database_checked: string = '';
-    const database: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.database'));
-    database.forEach(x => {
-        if(x.checked === true)
-            database_checked = x.value;
-    });
-    if (database_checked === ''){
-       console.warn('Did not select which database use.');
-       return false;
-    };
-    const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
-    const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
-    const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
-    const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
-    return {method_checked, database_checked,name, surname, age, subjects};
-};
+async function getDataFromServer(data: input) {
 
-async function sendRequest(data?: input, short_data?: short_input) {
+    type returnedData = {
+        data: Object,
+        id: string
+    }
 
     async function sendToServer(url: string) {
         const res = await fetch (url, {
-            method: data?.method_checked || short_data?.method_checked,
+            method: 'GET',
             headers: {
                 'Content-type': 'application/json; charset="utf-8"',
-            },
-            body: JSON.stringify({
-                data: data || short_data,
-            })
+            }
         });
         return res;
     };
@@ -191,9 +182,8 @@ async function sendRequest(data?: input, short_data?: short_input) {
     
     function createQuery() {
         let query_URI: string = '';
-        const query_data = { ...data };
+        const query_data: input = { ...data };
         delete query_data.database_checked;
-        delete query_data.method_checked;
         for (const key in query_data) {
             if (query_URI === '')
                 query_URI = `${key}=${query_data[key as keyof input]}`;
@@ -203,36 +193,16 @@ async function sendRequest(data?: input, short_data?: short_input) {
         return query_URI;
     };
 
-    if (data === undefined && short_data === undefined) {
-        console.log('No data to send to server');
-        return false;
-    };
-        
-    let url = ``;
-    let received_data = undefined;
-    if (data === undefined && short_data !== undefined) {
-        url = `${base_url}/${short_data.database_checked}?id=${short_data.id}`;
-        const res = await sendToServer(url);
-        received_data = await res.json();
-        console.log(received_data);
-    };
-
-    if (data !== undefined && short_data === undefined) {
-        deleteKeys();
-        const query = createQuery();
-        console.log(query);
-        if (data.method_checked === 'DELETE' || data.method_checked === 'MODIFY' || data.method_checked === 'GET')
-            url = `${base_url}/${data.database_checked}?${query}`;
-        if (data.method_checked === 'POST')
-            url = `${base_url}/${data.database_checked}`;
-        const res = await sendToServer(url);
-        received_data = await res.json();
-        console.log(received_data);
-    };
-
-    if (received_data !== undefined) {
-        displayResult(received_data, 'teachers');
-    };
+    let url: string = '';
+    deleteKeys();
+    url = `${base_url}/${data.database_checked}?${createQuery()}`;
+    const res = await sendToServer(url);
+    const return_data: returnedData[] = await res.json();
+    return_data.forEach(el => {
+        displayResult(el.data, el.id);
+    });
+    const user_input = document.querySelector('#user-data') as HTMLFormElement;
+    user_input.setAttribute('style', 'display: none');
 };
 
 async function checkIfServerOnline() {
@@ -242,7 +212,7 @@ async function checkIfServerOnline() {
     console.log(`${await res.text()}`);
 }
 
-function displayResult(returnedId: any, file: string) {
+function displayResult(data: any, id: string) {
     //Displaying result
     type returnedData = {
         name: string,
@@ -251,21 +221,10 @@ function displayResult(returnedId: any, file: string) {
         subjects: Array<string>
     };
 
-    async function getInfoFromDatabase(id: string) {
-        const url = `${base_url}/Database/${file}?id=${id}`;
-        const res = await fetch (url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'text/plain'
-            }
-        });
-        return await res.json();
-    };
-
     function createList(data: returnedData, id: string) {
-        const box = document.querySelector('#display-status') as HTMLDivElement;
+        const display_status_box = document.querySelector('#display-status') as HTMLDivElement;
         const list = document.createElement('ul');
-        box.appendChild(list);
+        display_status_box.appendChild(list);
         list.setAttribute('id', `${id}`);
         list.setAttribute('class', 'search-result');
         for (const key in data) {
@@ -299,12 +258,8 @@ function displayResult(returnedId: any, file: string) {
 
     };
 
-    const database: Array<returnedData> = [];
-    returnedId.forEach(async (el: any) => {
-        console.log(el.id);
-        database.unshift(await getInfoFromDatabase(el.id));
-        createList(database[0], el.id);
-    });
+    createList(data, id);
+
 };
 
 console.log("Loaded client");

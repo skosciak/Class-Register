@@ -44,11 +44,30 @@ window.addEventListener("DOMContentLoaded", () => {
             return;
         }
         ;
-        sendRequest(input);
+        getDataFromServer(input);
         console.log(input);
         event.preventDefault();
     });
 });
+function saveInput() {
+    let database_checked = '';
+    const database = document.querySelectorAll('.database');
+    database.forEach(x => {
+        if (x.checked === true)
+            database_checked = x.value;
+    });
+    if (database_checked === '') {
+        console.warn('Did not select which database use.');
+        return false;
+    }
+    ;
+    const name = document.querySelector("#first-field").value;
+    const surname = document.querySelector("#second-field").value;
+    const age = Number(document.querySelector("#third-field").value);
+    const subjects = [document.querySelector("#fourth-field").value];
+    return { database_checked, name, surname, age, subjects };
+}
+;
 function switchText(database_text_change) {
     class input_field {
         constructor(id) {
@@ -120,48 +139,15 @@ function switchText(database_text_change) {
     ;
 }
 ;
-function saveInput() {
-    let method_checked = '';
-    const method = document.querySelectorAll('.method');
-    method.forEach(x => {
-        if (x.checked === true)
-            method_checked = x.value;
-    });
-    if (method_checked === '') {
-        console.warn('Did not select which method use.');
-        return false;
-    }
-    ;
-    let database_checked = '';
-    const database = document.querySelectorAll('.database');
-    database.forEach(x => {
-        if (x.checked === true)
-            database_checked = x.value;
-    });
-    if (database_checked === '') {
-        console.warn('Did not select which database use.');
-        return false;
-    }
-    ;
-    const name = document.querySelector("#first-field").value;
-    const surname = document.querySelector("#second-field").value;
-    const age = Number(document.querySelector("#third-field").value);
-    const subjects = [document.querySelector("#fourth-field").value];
-    return { method_checked, database_checked, name, surname, age, subjects };
-}
-;
-function sendRequest(data, short_data) {
+function getDataFromServer(data) {
     return __awaiter(this, void 0, void 0, function* () {
         function sendToServer(url) {
             return __awaiter(this, void 0, void 0, function* () {
                 const res = yield fetch(url, {
-                    method: (data === null || data === void 0 ? void 0 : data.method_checked) || (short_data === null || short_data === void 0 ? void 0 : short_data.method_checked),
+                    method: 'GET',
                     headers: {
                         'Content-type': 'application/json; charset="utf-8"',
-                    },
-                    body: JSON.stringify({
-                        data: data || short_data,
-                    })
+                    }
                 });
                 return res;
             });
@@ -187,7 +173,6 @@ function sendRequest(data, short_data) {
             let query_URI = '';
             const query_data = Object.assign({}, data);
             delete query_data.database_checked;
-            delete query_data.method_checked;
             for (const key in query_data) {
                 if (query_URI === '')
                     query_URI = `${key}=${query_data[key]}`;
@@ -198,37 +183,16 @@ function sendRequest(data, short_data) {
             return query_URI;
         }
         ;
-        if (data === undefined && short_data === undefined) {
-            console.log('No data to send to server');
-            return false;
-        }
-        ;
-        let url = ``;
-        let received_data = undefined;
-        if (data === undefined && short_data !== undefined) {
-            url = `${base_url}/${short_data.database_checked}?id=${short_data.id}`;
-            const res = yield sendToServer(url);
-            received_data = yield res.json();
-            console.log(received_data);
-        }
-        ;
-        if (data !== undefined && short_data === undefined) {
-            deleteKeys();
-            const query = createQuery();
-            console.log(query);
-            if (data.method_checked === 'DELETE' || data.method_checked === 'MODIFY' || data.method_checked === 'GET')
-                url = `${base_url}/${data.database_checked}?${query}`;
-            if (data.method_checked === 'POST')
-                url = `${base_url}/${data.database_checked}`;
-            const res = yield sendToServer(url);
-            received_data = yield res.json();
-            console.log(received_data);
-        }
-        ;
-        if (received_data !== undefined) {
-            displayResult(received_data, 'teachers');
-        }
-        ;
+        let url = '';
+        deleteKeys();
+        url = `${base_url}/${data.database_checked}?${createQuery()}`;
+        const res = yield sendToServer(url);
+        const return_data = yield res.json();
+        return_data.forEach(el => {
+            displayResult(el.data, el.id);
+        });
+        const user_input = document.querySelector('#user-data');
+        user_input.setAttribute('style', 'display: none');
     });
 }
 ;
@@ -240,24 +204,11 @@ function checkIfServerOnline() {
         console.log(`${yield res.text()}`);
     });
 }
-function displayResult(returnedId, file) {
-    function getInfoFromDatabase(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const url = `${base_url}/Database/${file}?id=${id}`;
-            const res = yield fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'text/plain'
-                }
-            });
-            return yield res.json();
-        });
-    }
-    ;
+function displayResult(data, id) {
     function createList(data, id) {
-        const box = document.querySelector('#display-status');
+        const display_status_box = document.querySelector('#display-status');
         const list = document.createElement('ul');
-        box.appendChild(list);
+        display_status_box.appendChild(list);
         list.setAttribute('id', `${id}`);
         list.setAttribute('class', 'search-result');
         for (const key in data) {
@@ -293,12 +244,7 @@ function displayResult(returnedId, file) {
         ;
     }
     ;
-    const database = [];
-    returnedId.forEach((el) => __awaiter(this, void 0, void 0, function* () {
-        console.log(el.id);
-        database.unshift(yield getInfoFromDatabase(el.id));
-        createList(database[0], el.id);
-    }));
+    createList(data, id);
 }
 ;
 console.log("Loaded client");

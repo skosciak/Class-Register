@@ -1,18 +1,18 @@
 {
 	"teachers": {
 		"id_1": {
-			"name": "Adam",
-			"surname": "Strzelba",
+			"name": "adam",
+			"surname": "strzelba",
 			"subjects": [
-				"Polish"
+				"polish"
 			]
 		},
 		"id_2": {
-			"name": "Adam",
-			"surname": "Strzelba",
+			"name": "adam",
+			"surname": "strzelba",
 			"age": 47,
 			"subjects": [
-				"Polish"
+				"polish"
 			]
 		},
 		"id_3": {

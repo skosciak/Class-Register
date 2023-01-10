@@ -16,14 +16,30 @@ server.get('/', (req, res) => {
     res.status(200).send('Server online');
 });
 
-server.get('/Database/teachers?:id', (req, res) => {
-    const query = req.query.id;
+server.get('/teachers?:id', (req, res) => {
+
+    type returnedData = {
+        data: Object,
+        id: string
+    };
+
+    const query = req.query;
+    let return_data: any;
+    let return_array: returnedData[] = [];
     if (!query) {
         return res.status(400).send('failed to received')
     };
-    const return_data = returnTeacherInfo(`${query}`);
-    console.log(return_data);
-    res.status(200).json(return_data);
+    if (typeof query !== 'string') {
+         return_data = searchTeacher(String(query.name));
+    }
+    else
+        return_data = returnTeacherInfo(`${query}`);
+    return_data.forEach(el => {
+        return_array[return_array.length] = {
+            id: el.id, 
+            data: returnTeacherInfo(el.id)};
+    });
+    res.status(200).json(return_array);
 });
 
 server.post('/:database', (req, res) => {

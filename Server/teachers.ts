@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import { openFile, searchIfKeyExist } from './reusable.js';
 
+type key = { id: string };
+
 export function addNewTeacher (name: string, surname: string, subjects: string[], age?: number) {
     if ((name === (null || undefined)) || (surname === (null || undefined)) || (subjects.length === 0)) {
         console.warn("Name, surname and at least one subject is mandatory!!!");
@@ -39,7 +41,7 @@ export function returnFirstFreeID() {
     }
 };
 
-export function removeTeacher (id: Object | string | false){
+export function removeTeacher (id: key[] ){
     if (((Object.keys(id)).length !== 1) && typeof id !== "string") {
         console.warn(`Returned more than one teacher matching search result! Please specify more information for search!`);
         return {
@@ -47,21 +49,21 @@ export function removeTeacher (id: Object | string | false){
             id: id
         };
     }
-    else if (id === false){
+    else if (typeof id !== 'object' || typeof id !== 'string'){
         console.warn("Error occured!")
         return false;
     };
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
-    if (!searchIfKeyExist(open_file, id[0].id || id)) {
-        console.warn(`Teacher with this id ${id[0].id} does not exist`);
+    if (!searchIfKeyExist(open_file, id[0]['id'] || id)) {
+        console.warn(`Teacher with this id ${id[0]['id']} does not exist`);
         return false;
     };
     if (typeof id == "string") {
         delete read_file.teachers[id];
     }
     else {
-        delete read_file.teachers[id[0].id];
+        delete read_file.teachers[id[0]['id']];
     }
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
@@ -134,9 +136,10 @@ export function searchTeacher(name?: string, surname?: string, age?: number, sub
     };
     let subject_exist: number = 0
     let count_matches: number = 0;
-    type key = { id: string };
     const match: key[] = [];
-    try {
+    
+    //Checking if subjects are existing.
+    try { 
         if (subjects.length > 0){
             subject_exist = (Object.keys(teacher)).length - 1;
         };
@@ -149,6 +152,7 @@ export function searchTeacher(name?: string, surname?: string, age?: number, sub
             subject_exist = (Object.keys(teacher)).length;
         }
     };
+
     for (const id in read_file.teachers) {
         for (const new_key in teacher) {
             if (read_file.teachers[id][new_key] === teacher[new_key])
