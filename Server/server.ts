@@ -16,10 +16,12 @@ server.get('/', (req, res) => {
     res.status(200).send('Server online');
 });
 
+type key = { id: string };
+
 server.get('/teachers?:id', (req, res) => {
 
     type returnedData = {
-        data: Object,
+        data: object,
         id: string
     };
 
@@ -34,10 +36,10 @@ server.get('/teachers?:id', (req, res) => {
     }
     else
         return_data = returnTeacherInfo(`${query}`);
-    return_data.forEach(el => {
-        return_array[return_array.length] = {
-            id: el.id, 
-            data: returnTeacherInfo(el.id)};
+        return_data.forEach(el => {
+            return_array[return_array.length] = {
+                id: el.id, 
+                data: returnTeacherInfo(el.id)};
     });
     res.status(200).json(return_array);
 });
@@ -58,31 +60,16 @@ server.post('/:database', (req, res) => {
     }
 });
 
-server.delete('/teachers?:object', (req, res) => {
-    const { object } = req.params;
-    let query = req.query;
-    let data = req.body.data || req.body.short_data;
-    if (!data && !query) {
+server.delete('/teachers', (req, res) => {
+    let data = req.body || req.body.short_data;
+    if (!data) {
         return res.status(400).send('failed to received')
     };
-    if (data?.method_checked === 'DELETE' || query){
-        type more_than_one_id = {
-            status: boolean, 
-            id: Object
-        }
-
-        if (!data) {
-            data = query;
-        }
-
-        const finish: boolean | more_than_one_id = removeTeacher(searchTeacher(data.name, data.surname, data.age, data.subjects));
-        if (typeof finish != 'boolean') {
-            res.status(200).send(finish.id)
-        }
-        else {
-            console.log(`Removing teacher finished with status ${finish}`);
-            res.status(200).send(`Data received. Removed teacher ${data.name, data.surname, data.age, data.subject}`);
-        };
+    if (data.method_checked === 'DELETE'){
+        const teacher = searchTeacher(data.name, data.surname, data.age, data.subjects)
+        const finish: boolean = removeTeacher(teacher);
+        console.log(`Removing teacher finished with status ${finish}`);
+        res.status(200).send(`Data received. Removed teacher ${data.name, data.surname, data.age, data.subject}`);
     }
     else {
         res.status(200).send('Data received but did not specified method.')
