@@ -1,7 +1,8 @@
 const base_url = 'http://localhost:5500';
 
 type input = {
-    database_checked: string | undefined,
+    database_checked?: string | undefined,
+    method_checked?: string | undefined,
     name: string,
     surname: string,
     age: number,
@@ -37,43 +38,106 @@ const text_object = {
 window.addEventListener("DOMContentLoaded", () => {
     console.log("DOM Loaded");
     checkIfServerOnline();
-    const btn_database: NodeListOf<HTMLInputElement> = document.querySelectorAll('.database') as NodeListOf<HTMLInputElement>;
-    btn_database.forEach(el => {
+    const btn_method: NodeListOf<HTMLInputElement> = document.querySelectorAll('.database') as NodeListOf<HTMLInputElement>;
+    btn_method.forEach(el => {
         el.addEventListener('click', () => switchText(el.value));
     });
-    const btn = document.querySelector('#submit') as HTMLButtonElement;
-    btn.addEventListener("click", (event) => {
-        const input: false | input = saveInput();
+
+    const btn_user = document.querySelector('#submit') as HTMLButtonElement;
+    btn_user.addEventListener("click", (event) => {
+        let progress: string = 'user';
+        let database_temp: string = '';
+        let input = Input(progress, false) as input | boolean;
+         
+        Input(progress, true);
         if (input === false) {
             window.alert('Did not select which method to use.');
             event.preventDefault();
             return;
         };
-        getDataFromServer(input);
-        console.log(input);
+        if (typeof input !== 'boolean') {
+            if (input.database_checked)
+                database_temp = input.database_checked;
+            const dataResponce = async () => { 
+                let data_server: Object = await getDataFromServer(input as input);
+                if (typeof data_server === 'string' && data_server.length === 0) {
+                    window.alert('Server returned answer without matching result');
+                    return false;
+                };
+                return data_server
+            };
+            console.log(input);
+            dataResponce();
+        };
+
+        const btn_server = document.querySelector('#submit-to-server') as HTMLButtonElement;
+        btn_server.addEventListener("click", () => {
+            progress = 'server';
+            input = Input(progress, false) as input | boolean;
+            if (typeof input !== 'boolean') {
+                input.database_checked = database_temp;
+                getDataFromServer(input);
+            };
+        });
+
         event.preventDefault();
     });
 });
 
-function saveInput() {
-    let database_checked: string = '';
-    const database: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.database'));
-    database.forEach(x => {
-        if(x.checked === true)
+function Input(progress: string, clear_input: boolean) {
+
+    if (clear_input === true) {
+        const name = document.querySelector("#first-field") as HTMLInputElement;
+        const surname = document.querySelector("#second-field") as HTMLInputElement;
+        const age = document.querySelector("#third-field") as HTMLInputElement;
+        const subjects = document.querySelector("#fourth-field") as HTMLInputElement;
+        name.innerText = '';
+        surname.innerText = '';
+        age.innerText = '';
+        subjects.innerText = '';
+        return true;
+    }
+
+    if (progress === 'user') {
+        let database_checked: string = '';
+        const database: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.database'));
+        database.forEach(x => {
+            if(x.checked === true)
             database_checked = x.value;
-    });
-    if (database_checked === ''){
-       console.warn('Did not select which database use.');
-       return false;
+        });
+        if (database_checked === ''){
+            console.warn('Did not select which method use.');
+            return false;
+        };
+        const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
+        const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
+        const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
+        const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
+        return {database_checked, name, surname, age, subjects};
     };
-    const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
-    const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
-    const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
-    const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
-    return {database_checked, name, surname, age, subjects};
+
+    if (progress === 'server') {
+        let method_checked: string = '';
+        const method: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.method'));
+        method.forEach(x => {
+            if(x.checked === true)
+                method_checked = x.value;
+        });
+        if (method_checked === ''){
+            console.warn('Did not select which method use.');
+            return false;
+        };
+        const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
+        const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
+        const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
+        const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
+        return {method_checked, name, surname, age, subjects};
+    };
+
+    return false;
 };
 
-function switchText(database_text_change: string) {
+function switchText(method_text_change: string) {
 
     class input_field {
         public field: string;
@@ -107,7 +171,7 @@ function switchText(database_text_change: string) {
     input_wrapper.style.opacity = '1';
     input_wrapper.style.height = 'auto';
     const input = document.querySelector('#fourth-field') as HTMLInputElement;
-    switch (database_text_change) {
+    switch (method_text_change) {
         case 'classroom':
             field.first.innerText = text_object.classroom.classroom;
             field.first.setAttribute('value', 'classroom');
@@ -150,39 +214,50 @@ function switchText(database_text_change: string) {
     };
 };
 
-async function getDataFromServer(data: input) {
+async function getDataFromServer(data_user: input) {
 
     type returnedData = {
         data: Object,
         id: string
-    }
+    };
 
-    async function sendToServer(url: string) {
+    async function sendToServerGet(url: string) {
         const res = await fetch (url, {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json; charset="utf-8"',
-            }
+                }
+            });
+        return res;
+    };
+
+    async function sendToServer(url: string) {
+        const res = await fetch (url, {
+            method: data_user.method_checked,
+            headers: {
+                'Content-type': 'application/json; charset="utf-8"',
+                },
+            body: JSON.stringify(data_user)
         });
         return res;
     };
 
     function deleteKeys() {
-        for (const key in data) {
-            if (data[key as keyof input] === '' || undefined || null)
-                delete data[key as keyof input];
-            if (typeof data[key as keyof input] === 'number' && data[key as keyof input] === 0)
-                delete data[key as keyof input];
+        for (const key in data_user) {
+            if (data_user[key as keyof input] === '' || undefined || null)
+                delete data_user[key as keyof input];
+            if (typeof data_user[key as keyof input] === 'number' && data_user[key as keyof input] === 0)
+                delete data_user[key as keyof input];
             if (key === 'subjects') {
-                if (data.subjects?.length === 1 && data.subjects[0].length === 0)
-                    delete data[key as keyof input];
+                if (data_user.subjects?.length === 1 && data_user.subjects[0].length === 0)
+                    delete data_user[key as keyof input];
             };
         };
     };
     
     function createQuery() {
         let query_URI: string = '';
-        const query_data: input = { ...data };
+        const query_data: input = { ...data_user };
         delete query_data.database_checked;
         for (const key in query_data) {
             if (query_URI === '')
@@ -195,14 +270,24 @@ async function getDataFromServer(data: input) {
 
     let url: string = '';
     deleteKeys();
-    url = `${base_url}/${data.database_checked}?${createQuery()}`;
-    const res = await sendToServer(url);
-    const return_data: returnedData[] = await res.json();
-    return_data.forEach(el => {
-        displayResult(el.data, el.id);
-    });
-    const user_input = document.querySelector('#user-data') as HTMLFormElement;
-    user_input.setAttribute('style', 'display: none');
+    if (data_user.method_checked === undefined) {
+        url = `${base_url}/${data_user.database_checked}?${createQuery()}`;
+        const res = await sendToServerGet(url);
+        const return_data: returnedData[] = await res.json();
+        return_data.forEach(el => {
+            displayResult(el.data, el.id);
+        });
+        return return_data;
+    }
+    else {
+        url = `${base_url}/${data_user.database_checked}`;
+        const res = await sendToServer(url);
+        const return_data: returnedData[] = await res.json();
+        return_data.forEach(el => {
+            displayResult(el.data, el.id);
+        });
+        return return_data;
+    };
 };
 
 async function checkIfServerOnline() {
@@ -222,6 +307,10 @@ function displayResult(data: any, id: string) {
     };
 
     function createList(data: returnedData, id: string) {
+        const user_input = document.querySelector('#user-data') as HTMLFormElement;
+        user_input.setAttribute('style', 'display: none');
+        const server_input = document.querySelector('#server-data') as HTMLFormElement;
+        server_input.setAttribute('style', '');
         const display_status_box = document.querySelector('#display-status') as HTMLDivElement;
         const list = document.createElement('ul');
         display_status_box.appendChild(list);
@@ -241,6 +330,7 @@ function displayResult(data: any, id: string) {
         };
         list.addEventListener('click', (event) => {
             addFromListToInputs(event);
+            list.classList.toggle('search-result-green');
         });
     };
 

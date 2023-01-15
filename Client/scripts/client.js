@@ -31,44 +31,105 @@ const text_object = {
 window.addEventListener("DOMContentLoaded", () => {
     console.log("DOM Loaded");
     checkIfServerOnline();
-    const btn_database = document.querySelectorAll('.database');
-    btn_database.forEach(el => {
+    const btn_method = document.querySelectorAll('.database');
+    btn_method.forEach(el => {
         el.addEventListener('click', () => switchText(el.value));
     });
-    const btn = document.querySelector('#submit');
-    btn.addEventListener("click", (event) => {
-        const input = saveInput();
+    const btn_user = document.querySelector('#submit');
+    btn_user.addEventListener("click", (event) => {
+        let progress = 'user';
+        let database_temp = '';
+        let input = Input(progress, false);
+        Input(progress, true);
         if (input === false) {
             window.alert('Did not select which method to use.');
             event.preventDefault();
             return;
         }
         ;
-        getDataFromServer(input);
-        console.log(input);
+        if (typeof input !== 'boolean') {
+            if (input.database_checked)
+                database_temp = input.database_checked;
+            const dataResponce = () => __awaiter(void 0, void 0, void 0, function* () {
+                let data_server = yield getDataFromServer(input);
+                if (typeof data_server === 'string' && data_server.length === 0) {
+                    window.alert('Server returned answer without matching result');
+                    return false;
+                }
+                ;
+                return data_server;
+            });
+            console.log(input);
+            dataResponce();
+        }
+        ;
+        const btn_server = document.querySelector('#submit-to-server');
+        btn_server.addEventListener("click", () => {
+            progress = 'server';
+            input = Input(progress, false);
+            if (typeof input !== 'boolean') {
+                input.database_checked = database_temp;
+                getDataFromServer(input);
+            }
+            ;
+        });
         event.preventDefault();
     });
 });
-function saveInput() {
-    let database_checked = '';
-    const database = document.querySelectorAll('.database');
-    database.forEach(x => {
-        if (x.checked === true)
-            database_checked = x.value;
-    });
-    if (database_checked === '') {
-        console.warn('Did not select which database use.');
-        return false;
+function Input(progress, clear_input) {
+    if (clear_input === true) {
+        const name = document.querySelector("#first-field");
+        const surname = document.querySelector("#second-field");
+        const age = document.querySelector("#third-field");
+        const subjects = document.querySelector("#fourth-field");
+        name.innerText = '';
+        surname.innerText = '';
+        age.innerText = '';
+        subjects.innerText = '';
+        return true;
+    }
+    if (progress === 'user') {
+        let database_checked = '';
+        const database = document.querySelectorAll('.database');
+        database.forEach(x => {
+            if (x.checked === true)
+                database_checked = x.value;
+        });
+        if (database_checked === '') {
+            console.warn('Did not select which method use.');
+            return false;
+        }
+        ;
+        const name = document.querySelector("#first-field").value;
+        const surname = document.querySelector("#second-field").value;
+        const age = Number(document.querySelector("#third-field").value);
+        const subjects = [document.querySelector("#fourth-field").value];
+        return { database_checked, name, surname, age, subjects };
     }
     ;
-    const name = document.querySelector("#first-field").value;
-    const surname = document.querySelector("#second-field").value;
-    const age = Number(document.querySelector("#third-field").value);
-    const subjects = [document.querySelector("#fourth-field").value];
-    return { database_checked, name, surname, age, subjects };
+    if (progress === 'server') {
+        let method_checked = '';
+        const method = document.querySelectorAll('.method');
+        method.forEach(x => {
+            if (x.checked === true)
+                method_checked = x.value;
+        });
+        if (method_checked === '') {
+            console.warn('Did not select which method use.');
+            return false;
+        }
+        ;
+        const name = document.querySelector("#first-field").value;
+        const surname = document.querySelector("#second-field").value;
+        const age = Number(document.querySelector("#third-field").value);
+        const subjects = [document.querySelector("#fourth-field").value];
+        return { method_checked, name, surname, age, subjects };
+    }
+    ;
+    return false;
 }
 ;
-function switchText(database_text_change) {
+function switchText(method_text_change) {
     class input_field {
         constructor(id) {
             this.field = id;
@@ -98,7 +159,7 @@ function switchText(database_text_change) {
     input_wrapper.style.opacity = '1';
     input_wrapper.style.height = 'auto';
     const input = document.querySelector('#fourth-field');
-    switch (database_text_change) {
+    switch (method_text_change) {
         case 'classroom':
             field.first.innerText = text_object.classroom.classroom;
             field.first.setAttribute('value', 'classroom');
@@ -139,9 +200,9 @@ function switchText(database_text_change) {
     ;
 }
 ;
-function getDataFromServer(data) {
+function getDataFromServer(data_user) {
     return __awaiter(this, void 0, void 0, function* () {
-        function sendToServer(url) {
+        function sendToServerGet(url) {
             return __awaiter(this, void 0, void 0, function* () {
                 const res = yield fetch(url, {
                     method: 'GET',
@@ -153,16 +214,29 @@ function getDataFromServer(data) {
             });
         }
         ;
+        function sendToServer(url) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const res = yield fetch(url, {
+                    method: data_user.method_checked,
+                    headers: {
+                        'Content-type': 'application/json; charset="utf-8"',
+                    },
+                    body: JSON.stringify(data_user)
+                });
+                return res;
+            });
+        }
+        ;
         function deleteKeys() {
             var _a;
-            for (const key in data) {
-                if (data[key] === '' || undefined || null)
-                    delete data[key];
-                if (typeof data[key] === 'number' && data[key] === 0)
-                    delete data[key];
+            for (const key in data_user) {
+                if (data_user[key] === '' || undefined || null)
+                    delete data_user[key];
+                if (typeof data_user[key] === 'number' && data_user[key] === 0)
+                    delete data_user[key];
                 if (key === 'subjects') {
-                    if (((_a = data.subjects) === null || _a === void 0 ? void 0 : _a.length) === 1 && data.subjects[0].length === 0)
-                        delete data[key];
+                    if (((_a = data_user.subjects) === null || _a === void 0 ? void 0 : _a.length) === 1 && data_user.subjects[0].length === 0)
+                        delete data_user[key];
                 }
                 ;
             }
@@ -171,7 +245,7 @@ function getDataFromServer(data) {
         ;
         function createQuery() {
             let query_URI = '';
-            const query_data = Object.assign({}, data);
+            const query_data = Object.assign({}, data_user);
             delete query_data.database_checked;
             for (const key in query_data) {
                 if (query_URI === '')
@@ -185,14 +259,25 @@ function getDataFromServer(data) {
         ;
         let url = '';
         deleteKeys();
-        url = `${base_url}/${data.database_checked}?${createQuery()}`;
-        const res = yield sendToServer(url);
-        const return_data = yield res.json();
-        return_data.forEach(el => {
-            displayResult(el.data, el.id);
-        });
-        const user_input = document.querySelector('#user-data');
-        user_input.setAttribute('style', 'display: none');
+        if (data_user.method_checked === undefined) {
+            url = `${base_url}/${data_user.database_checked}?${createQuery()}`;
+            const res = yield sendToServerGet(url);
+            const return_data = yield res.json();
+            return_data.forEach(el => {
+                displayResult(el.data, el.id);
+            });
+            return return_data;
+        }
+        else {
+            url = `${base_url}/${data_user.database_checked}`;
+            const res = yield sendToServer(url);
+            const return_data = yield res.json();
+            return_data.forEach(el => {
+                displayResult(el.data, el.id);
+            });
+            return return_data;
+        }
+        ;
     });
 }
 ;
@@ -206,6 +291,10 @@ function checkIfServerOnline() {
 }
 function displayResult(data, id) {
     function createList(data, id) {
+        const user_input = document.querySelector('#user-data');
+        user_input.setAttribute('style', 'display: none');
+        const server_input = document.querySelector('#server-data');
+        server_input.setAttribute('style', '');
         const display_status_box = document.querySelector('#display-status');
         const list = document.createElement('ul');
         display_status_box.appendChild(list);
@@ -226,6 +315,7 @@ function displayResult(data, id) {
         ;
         list.addEventListener('click', (event) => {
             addFromListToInputs(event);
+            list.classList.toggle('search-result-green');
         });
     }
     ;

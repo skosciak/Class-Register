@@ -49,27 +49,17 @@ server.post('/:database', (req, res) => {
         res.status(200).send('Data received but did not specified method.');
     }
 });
-server.delete('/teachers?:object', (req, res) => {
-    const { object } = req.params;
-    let query = req.query;
-    let data = req.body.data || req.body.short_data;
-    if (!data && !query) {
+server.delete('/teachers', (req, res) => {
+    let data = req.body || req.body.short_data;
+    if (!data) {
         return res.status(400).send('failed to received');
     }
     ;
-    if ((data === null || data === void 0 ? void 0 : data.method_checked) === 'DELETE' || query) {
-        if (!data) {
-            data = query;
-        }
-        const finish = removeTeacher(searchTeacher(data.name, data.surname, data.age, data.subjects));
-        if (typeof finish != 'boolean') {
-            res.status(200).send(finish.id);
-        }
-        else {
-            console.log(`Removing teacher finished with status ${finish}`);
-            res.status(200).send(`Data received. Removed teacher ${data.name, data.surname, data.age, data.subject}`);
-        }
-        ;
+    if (data.method_checked === 'DELETE') {
+        const teacher = searchTeacher(data.name, data.surname, data.age, data.subjects);
+        const finish = removeTeacher(teacher);
+        console.log(`Removing teacher finished with status ${finish}`);
+        res.status(200).send(`Data received. Removed teacher ${data.name, data.surname, data.age, data.subject}`);
     }
     else {
         res.status(200).send('Data received but did not specified method.');

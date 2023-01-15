@@ -42,31 +42,20 @@ export function returnFirstFreeID() {
 }
 ;
 export function removeTeacher(id) {
-    if (((Object.keys(id)).length !== 1) && typeof id !== "string") {
-        console.warn(`Returned more than one teacher matching search result! Please specify more information for search!`);
-        return {
-            status: false,
-            id: id
-        };
-    }
-    else if (typeof id !== 'object' || typeof id !== 'string') {
+    if (Array.isArray(id) && id.length != 1) {
         console.warn("Error occured!");
         return false;
     }
     ;
+    const teacher_id = id[0].id;
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
-    if (!searchIfKeyExist(open_file, id[0]['id'] || id)) {
-        console.warn(`Teacher with this id ${id[0]['id']} does not exist`);
+    if (!searchIfKeyExist(open_file, teacher_id)) {
+        console.warn(`Teacher with this id ${teacher_id} does not exist`);
         return false;
     }
     ;
-    if (typeof id == "string") {
-        delete read_file.teachers[id];
-    }
-    else {
-        delete read_file.teachers[id[0]['id']];
-    }
+    delete read_file.teachers[teacher_id];
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
     return true;
