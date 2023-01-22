@@ -30,30 +30,42 @@ const text_object = {
 };
 window.addEventListener("DOMContentLoaded", () => {
     console.log("DOM Loaded");
-    checkIfServerOnline();
-    const btn_method = document.querySelectorAll('.database');
+    console.log('Checking connection with server...');
+    //Checking if server is online or offline
+    checkServerStatus().then(x => {
+        if (x === true)
+            console.log('Server connected');
+        else
+            console.error('Could not connect to server');
+    });
+    //Adding event listener to which database user chosen
+    const btn_method = document.querySelectorAll('.first-step');
     btn_method.forEach(el => {
         el.addEventListener('click', () => switchText(el.value));
     });
+    //Adding event listener to button with id submit
     const btn_user = document.querySelector('#submit');
     btn_user.addEventListener("click", (event) => {
         let progress = 'user';
         let database_temp = '';
+        //Saving data which user input
         let input = Input(progress, false);
+        //Clearing data in inputs for either choosing different data or staying clear
         Input(progress, true);
+        //If the user did not select database input returned a boolean value
         if (input === false) {
-            window.alert('Did not select which method to use.');
+            window.alert('Did not select database.');
             event.preventDefault();
             return;
         }
         ;
+        //If type is not boolean function start working with data
         if (typeof input !== 'boolean') {
-            if (input.database_checked)
-                database_temp = input.database_checked;
+            //Function returning data from server or string with error message
             const dataResponce = () => __awaiter(void 0, void 0, void 0, function* () {
                 let data_server = yield getDataFromServer(input);
-                if (typeof data_server === 'string' && data_server.length === 0) {
-                    window.alert('Server returned answer without matching result');
+                if (typeof data_server === 'string' && typeof input !== "boolean" && input.method_check === 'POST') {
+                    window.alert(data_server);
                     return false;
                 }
                 ;
@@ -63,12 +75,16 @@ window.addEventListener("DOMContentLoaded", () => {
             dataResponce();
         }
         ;
+        //This menu only shows when user did not select add method.
         const btn_server = document.querySelector('#submit-to-server');
         btn_server.addEventListener("click", () => {
             progress = 'server';
+            //We cleared all inputs before and need to send whole input type data.
+            if (typeof input !== 'boolean')
+                database_temp = input.database_check;
             input = Input(progress, false);
             if (typeof input !== 'boolean') {
-                input.database_checked = database_temp;
+                input.database_check = database_temp;
                 getDataFromServer(input);
             }
             ;
@@ -76,6 +92,11 @@ window.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
     });
 });
+//Function save user input and have 3 options.
+//'progress' which can be 'user' or 'server'
+//'user' - needs to select at least one database and choose if he wants to add data inserted later
+//'server' - only select left methods remove, modify or search
+//'clear_input' - to clear inputss
 function Input(progress, clear_input) {
     if (clear_input === true) {
         const name = document.querySelector("#first-field");
@@ -89,14 +110,15 @@ function Input(progress, clear_input) {
         return true;
     }
     if (progress === 'user') {
-        let database_checked = '';
+        let database_check = '';
+        const post_method = document.querySelector('#method-add');
         const database = document.querySelectorAll('.database');
         database.forEach(x => {
             if (x.checked === true)
-                database_checked = x.value;
+                database_check = x.value;
         });
-        if (database_checked === '') {
-            console.warn('Did not select which method use.');
+        if (database_check === '') {
+            console.warn('Did not select which database use.');
             return false;
         }
         ;
@@ -104,17 +126,21 @@ function Input(progress, clear_input) {
         const surname = document.querySelector("#second-field").value;
         const age = Number(document.querySelector("#third-field").value);
         const subjects = [document.querySelector("#fourth-field").value];
-        return { database_checked, name, surname, age, subjects };
+        const method_check = post_method.value;
+        if (post_method.checked === true)
+            return { database_check, name, surname, age, subjects, method_check };
+        else
+            return { database_check, name, surname, age, subjects };
     }
     ;
     if (progress === 'server') {
-        let method_checked = '';
+        let method_check = '';
         const method = document.querySelectorAll('.method');
         method.forEach(x => {
             if (x.checked === true)
-                method_checked = x.value;
+                method_check = x.value;
         });
-        if (method_checked === '') {
+        if (method_check === '') {
             console.warn('Did not select which method use.');
             return false;
         }
@@ -123,12 +149,13 @@ function Input(progress, clear_input) {
         const surname = document.querySelector("#second-field").value;
         const age = Number(document.querySelector("#third-field").value);
         const subjects = [document.querySelector("#fourth-field").value];
-        return { method_checked, name, surname, age, subjects };
+        return { method_check, name, surname, age, subjects };
     }
     ;
     return false;
 }
 ;
+//Function switch text when user change databases
 function switchText(method_text_change) {
     class input_field {
         constructor(id) {
@@ -200,8 +227,12 @@ function switchText(method_text_change) {
     ;
 }
 ;
+//Function sending data to server as query or user data
+//'data_user' - only accepts data with type input
 function getDataFromServer(data_user) {
     return __awaiter(this, void 0, void 0, function* () {
+        //Function only for 'GET' method
+        //'url' - 'GET' method only send data in form of query
         function sendToServerGet(url) {
             return __awaiter(this, void 0, void 0, function* () {
                 const res = yield fetch(url, {
@@ -214,10 +245,13 @@ function getDataFromServer(data_user) {
             });
         }
         ;
+        //Function for 'POST', 'DELETE', 'PATCH'
+        //'url' - uses as short url to show which database we want to use
+        //In body we pass 'data_user' with data inserted by user
         function sendToServer(url) {
             return __awaiter(this, void 0, void 0, function* () {
                 const res = yield fetch(url, {
-                    method: data_user.method_checked,
+                    method: data_user.method_check,
                     headers: {
                         'Content-type': 'application/json; charset="utf-8"',
                     },
@@ -227,6 +261,7 @@ function getDataFromServer(data_user) {
             });
         }
         ;
+        //Function delete unused keys.
         function deleteKeys() {
             var _a;
             for (const key in data_user) {
@@ -243,10 +278,11 @@ function getDataFromServer(data_user) {
             ;
         }
         ;
+        //Function creates query for 'GET' method
         function createQuery() {
             let query_URI = '';
             const query_data = Object.assign({}, data_user);
-            delete query_data.database_checked;
+            delete query_data.database_check;
             for (const key in query_data) {
                 if (query_URI === '')
                     query_URI = `${key}=${query_data[key]}`;
@@ -259,8 +295,11 @@ function getDataFromServer(data_user) {
         ;
         let url = '';
         deleteKeys();
-        if (data_user.method_checked === undefined) {
-            url = `${base_url}/${data_user.database_checked}?${createQuery()}`;
+        //If 'method_check' is not present function first check if data is not present in databases
+        //If it returns data function will display it for easier use.
+        //If 'method_check' is present it means that we want to do a specific task to proceed
+        if (data_user.method_check === undefined) {
+            url = `${base_url}/${data_user.database_check}?${createQuery()}`;
             const res = yield sendToServerGet(url);
             const return_data = yield res.json();
             return_data.forEach(el => {
@@ -269,27 +308,56 @@ function getDataFromServer(data_user) {
             return return_data;
         }
         else {
-            url = `${base_url}/${data_user.database_checked}`;
+            url = `${base_url}/${data_user.database_check}`;
             const res = yield sendToServer(url);
             const return_data = yield res.json();
-            return_data.forEach(el => {
-                displayResult(el.data, el.id);
-            });
-            return return_data;
+            if (typeof return_data === 'string') {
+                console.warn('Cannot add new teacher. Name, surname and at least one subject is mandatory!!!');
+                return return_data;
+            }
+            else {
+                return_data.forEach(el => {
+                    displayResult(el.data, el.id, data_user.method_check);
+                });
+                return return_data;
+            }
+            ;
         }
         ;
     });
 }
 ;
-function checkIfServerOnline() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const res = yield fetch(base_url, {
-            method: 'GET',
-        });
-        console.log(`${yield res.text()}`);
+//Simply synchronus function to check if server is online or offline
+function checkServerStatus() {
+    let return_response;
+    const res = fetch(`${base_url}/server_status`, {
+        method: 'GET',
+        headers: {
+            'Content-type': 'application/json; charset="utf-8"',
+        }
+    });
+    return res.then(res => {
+        console.log(res.status);
+        if (res.status === 200) {
+            return true;
+        }
+        else
+            return false;
+    }).catch(error => {
+        console.error(`This is error: ${error}`);
+        return false;
     });
 }
-function displayResult(data, id) {
+//Function for displaying second step menus
+function displayResult(data, id, method) {
+    //If sent data for 'POST' method returns data from the server with similar data inserted by the user
+    //On client side will appear simple menu for confirmation to realize his request even if the data is similar
+    if (method === 'POST') {
+        const force_post = document.querySelector('#force-post');
+        force_post.setAttribute('style', '');
+    }
+    ;
+    //Function create list with id and data returned by server
     function createList(data, id) {
         const user_input = document.querySelector('#user-data');
         user_input.setAttribute('style', 'display: none');
@@ -319,6 +387,7 @@ function displayResult(data, id) {
         });
     }
     ;
+    //Function inserts data from lists to hidden inputs which we can later use
     function addFromListToInputs(event) {
         const id = event.composedPath()[2].id;
         const list = document.querySelector(`#${id}`);

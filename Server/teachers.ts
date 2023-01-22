@@ -4,27 +4,24 @@ import { openFile, searchIfKeyExist } from './reusable.js';
 type key = { id: string };
 
 export function addNewTeacher (name: string, surname: string, subjects: string[], age?: number) {
-    if ((name === (null || undefined)) || (surname === (null || undefined)) || (subjects.length === 0)) {
-        console.warn("Name, surname and at least one subject is mandatory!!!");
-        return false;
-    };
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     const new_teacher = {
         "name": name.toLowerCase(),
         "surname": surname.toLowerCase(),
         "age": age,
-        "subjects": subjects.map(subjects => subjects.toLowerCase())
+        "subjects": subjects?.map(subjects => subjects.toLowerCase())
     };
     if (age === (null || undefined))
         delete new_teacher.age;
-    read_file.teachers[returnFirstFreeID()] = new_teacher;
+    const id: string = returnFirstFreeID();
+    read_file.teachers[id] = new_teacher;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
     return true;
 };
 
-export function returnFirstFreeID() {
+function returnFirstFreeID() {
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     let last_id: number = 0;
@@ -35,7 +32,7 @@ export function returnFirstFreeID() {
             last_id = id;
         };
     };
-    for (let i = 1; i < (id + 2); i++) {
+    for (let i = 1; i < (last_id + 2); i++) {
         if (read_file.teachers[`id_${i}`] === undefined || null)
             return `id_${i}`;
     }
@@ -155,7 +152,7 @@ export function searchTeacher(name?: string, surname?: string, age?: number, sub
                     'id': id
                 };
             }
-            else {
+            else if (read_file.teachers[id].subjects !== undefined) {
                 for (const subject of read_file.teachers[id].subjects) {
                     if (typeof teacher.subjects != 'string') {
                         for (const search_subject of teacher.subjects) {

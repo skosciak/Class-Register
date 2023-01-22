@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import { addNewTeacher, removeTeacher, returnTeacherInfo, searchTeacher } from './teachers.js';
 
+type returnedData = {
+    data: object,
+    id: string
+};
 
 const server = express();
 const port: number = 5500;
@@ -12,7 +16,9 @@ server.use(cors({
         'origin': '*',
         'methods': '*'
     }));
-server.get('/', (req, res) => {
+
+server.get(`/server_status`, (req, res) => {
+    console.log(`Incoming traffic from IP: ${req.ip} HOSTNAME: ${req.hostname}`);
     res.status(200).send('Server online');
 });
 
@@ -20,14 +26,10 @@ type key = { id: string };
 
 server.get('/teachers?:id', (req, res) => {
 
-    type returnedData = {
-        data: object,
-        id: string
-    };
-
-    const query = req.query;
     let return_data: any;
     let return_array: returnedData[] = [];
+
+    const query = req.query;
     if (!query) {
         return res.status(400).send('failed to received')
     };
@@ -45,19 +47,32 @@ server.get('/teachers?:id', (req, res) => {
 });
 
 server.post('/:database', (req, res) => {
-    const { database } = req.params;
-    const data = req.body.data || req.body.short_data;
+
+    let return_data: any;
+    let return_array: returnedData[] = [];
+
+    const data = req.body;
     if (!data) {
-        return res.status(400).send('failed to received')
+        return res.status(400).send('Failed to received')
     };
-    if (searchTeacher(data.name, data.surname, data.age, data.subjects)){
-        addNewTeacher(data.name, data.surname, data.subjects, data.age);
+    if ((typeof data.name === 'undefined') || (typeof data.surname === 'undefined') || (typeof data.subjects === 'undefined')) {
+        console.log(`Cannot add new teacher`);
+        return res.status(200).json(`Data received. Name, surname and at least one subject is mandatory!!!`);
+    };
+    return_data = searchTeacher(data.name, data.surname, data.age, data.subjects);
+    if (return_data.length !== 0) {
+        return_data.forEach(el => {
+            return_array[return_array.length] = {
+                id: el.id, 
+                data: returnTeacherInfo(el.id)};
+        });
+        return res.status(200).json(return_array);
+    };
+    const add_result: boolean = addNewTeacher(data.name, data.surname, data.subjects, data.age);
+    if (add_result === true) {
         console.log(`Added new teacher`);
-        res.status(200).send(`Data received. Added new teacher`);
-    }
-    else {
-        res.status(200).send('Data received but did not specified method.')
-    }
+        return res.status(200).json(`Data received. Added new teacher`);
+    };
 });
 
 server.delete('/teachers', (req, res) => {
@@ -74,6 +89,10 @@ server.delete('/teachers', (req, res) => {
     else {
         res.status(200).send('Data received but did not specified method.')
     }
+});
+
+server.patch('/', (req, res) => {
+
 });
 
 
