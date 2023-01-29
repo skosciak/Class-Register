@@ -2,20 +2,24 @@ import * as fs from 'fs';
 import { openFile, searchIfKeyExist } from './reusable.js';
 
 type key = { id: string };
+type teacher = {
+    name?: string,
+    surname?: string,
+    age?: number,
+    subjects?: string[]
+};
 
-export function addNewTeacher (name: string, surname: string, subjects: string[], age?: number) {
+export function addNewTeacher (teacher: teacher) {
+    teacher.name.toLowerCase();
+    teacher.surname.toLowerCase(),
+    teacher.age,
+    teacher.subjects?.map(subjects => subjects.toLowerCase())
+    if (teacher.age === (null || undefined))
+        delete teacher.age;
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
-    const new_teacher = {
-        "name": name.toLowerCase(),
-        "surname": surname.toLowerCase(),
-        "age": age,
-        "subjects": subjects?.map(subjects => subjects.toLowerCase())
-    };
-    if (age === (null || undefined))
-        delete new_teacher.age;
     const id: string = returnFirstFreeID();
-    read_file.teachers[id] = new_teacher;
+    read_file.teachers[id] = teacher;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
     return true;
@@ -57,13 +61,11 @@ export function removeTeacher (id: key | key[]){
     return true;
 }
 
-export function modifyTeacher (id: Object, name?: string, surname?: string, age?: number, subjects?: string[]) {
-    let teacher = {
-        "name": name.toLowerCase(),
-        "surname": surname.toLowerCase(),
-        "age": age,
-        "subjects": subjects.map(subjects => subjects.toLowerCase())
-    };
+export function modifyTeacher (teacher: teacher, id?: key) {
+    teacher.name.toLowerCase();
+    teacher.surname.toLowerCase(),
+    teacher.age,
+    teacher.subjects?.map(subjects => subjects.toLowerCase())
     for (const [key, value] of Object.entries(teacher)) {
         if (value === undefined || null)
             delete teacher[key];
@@ -87,29 +89,22 @@ export function modifyTeacher (id: Object, name?: string, surname?: string, age?
     fs.writeFileSync(open_file, update_file);
 };
 
-export function searchTeacher(name?: string, surname?: string, age?: number, subjects?: string[] | string) {
+export function searchTeacher(teacher: teacher) {
 
-    if (name != undefined) {
-        name = name.toLowerCase();
+    if (teacher.name != undefined) {
+        teacher.name = teacher.name.toLowerCase();
     }
 
-    if (surname != undefined) {
-        surname = surname.toLowerCase();
+    if (teacher.surname != undefined) {
+        teacher.surname = teacher.surname.toLowerCase();
     }
 
-    if (age && (age != undefined))
-        age = parseInt(String(age));
+    if (teacher.age && (teacher.age != undefined))
+        teacher.age = parseInt(String(teacher.age));
 
-    if (Array.isArray(subjects) && subjects != undefined) {
-        subjects = subjects.map(subjects => subjects.toLowerCase());
+    if (Array.isArray(teacher.subjects) && teacher.subjects != undefined) {
+        teacher.subjects = teacher.subjects.map(subjects => subjects.toLowerCase());
     };
-        
-    let teacher = {
-        "name": name,
-        "surname": surname,
-        "age": age,
-        "subjects": subjects
-    }
 
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
@@ -127,12 +122,12 @@ export function searchTeacher(name?: string, surname?: string, age?: number, sub
     
     //Checking if subjects are existing.
     try { 
-        if (subjects.length > 0){
+        if (teacher.subjects.length > 0){
             subject_exist = (Object.keys(teacher)).length - 1;
         };
     }
     catch {
-        if (subjects !== undefined || null){
+        if (teacher.subjects !== undefined || null){
             subject_exist = (Object.keys(teacher)).length - 1;
         }
         else {
@@ -147,7 +142,7 @@ export function searchTeacher(name?: string, surname?: string, age?: number, sub
         };
         if (count_matches === subject_exist){
             count_matches = 0;
-            if (subjects === undefined || null) {
+            if (teacher.subjects === undefined || null) {
                 match[match.length] = {
                     'id': id
                 };
@@ -159,7 +154,7 @@ export function searchTeacher(name?: string, surname?: string, age?: number, sub
                             if (subject === search_subject)
                                 count_matches++;
                         };
-                        if (count_matches === (Object.keys(subjects)).length){
+                        if (count_matches === (Object.keys(teacher.subjects)).length){
                             match[match.length] = {
                                 'id': id
                             };

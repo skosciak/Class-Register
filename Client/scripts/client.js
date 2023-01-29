@@ -43,6 +43,15 @@ window.addEventListener("DOMContentLoaded", () => {
     btn_method.forEach(el => {
         el.addEventListener('click', () => switchText(el.value));
     });
+    const add_method_button = document.querySelector('#method-add-button');
+    add_method_button.addEventListener('click', (event) => {
+        const add_method_button_wrapper = document.querySelector('#method-add-button-wrapper');
+        add_method_button.classList.toggle('add-off');
+        add_method_button.classList.toggle('add-on');
+        add_method_button_wrapper.classList.toggle('add-wrapper-off');
+        add_method_button_wrapper.classList.toggle('add-wrapper-on');
+        event.preventDefault();
+    });
     //Adding event listener to button with id submit
     const btn_user = document.querySelector('#submit');
     btn_user.addEventListener("click", (event) => {
@@ -64,8 +73,8 @@ window.addEventListener("DOMContentLoaded", () => {
             //Function returning data from server or string with error message
             const dataResponce = () => __awaiter(void 0, void 0, void 0, function* () {
                 let data_server = yield getDataFromServer(input);
-                if (typeof data_server === 'string' && typeof input !== "boolean" && input.method_check === 'POST') {
-                    window.alert(data_server);
+                if (typeof data_server === 'string' && typeof input !== "boolean") {
+                    console.warn(data_server);
                     return false;
                 }
                 ;
@@ -111,7 +120,7 @@ function Input(progress, clear_input) {
     }
     if (progress === 'user') {
         let database_check = '';
-        const post_method = document.querySelector('#method-add');
+        const post_method = document.querySelector('#method-add-button');
         const database = document.querySelectorAll('.database');
         database.forEach(x => {
             if (x.checked === true)
@@ -127,7 +136,7 @@ function Input(progress, clear_input) {
         const age = Number(document.querySelector("#third-field").value);
         const subjects = [document.querySelector("#fourth-field").value];
         const method_check = post_method.value;
-        if (post_method.checked === true)
+        if (post_method.className === 'add-on')
             return { database_check, name, surname, age, subjects, method_check };
         else
             return { database_check, name, surname, age, subjects };
@@ -162,64 +171,78 @@ function switchText(method_text_change) {
             this.field = id;
         }
         ;
-        returnSelect() {
+        returnLabel() {
+            return document.querySelector(`#${this.field}`);
+        }
+        ;
+        returnInput() {
             return document.querySelector(`#${this.field}`);
         }
         ;
     }
     ;
-    let _field = new input_field('first-field-label');
-    const first_field = _field.returnSelect();
-    _field = new input_field('second-field-label');
-    const second_field = _field.returnSelect();
-    _field = new input_field('third-field-label');
-    const third_field = _field.returnSelect();
-    _field = new input_field('fourth-field-label');
-    const fourth_field = _field.returnSelect();
     const field = {
-        first: first_field,
-        second: second_field,
-        third: third_field,
-        fourth: fourth_field,
+        label: {
+            first: new input_field('first-field-label').returnLabel(),
+            second: new input_field('second-field-label').returnLabel(),
+            third: new input_field('third-field-label').returnLabel(),
+            fourth: new input_field('fourth-field-label').returnLabel()
+        },
+        input: {
+            first: new input_field('first-field').returnInput(),
+            second: new input_field('second-field').returnInput(),
+            third: new input_field('third-field').returnInput(),
+            fourth: new input_field('fourth-field').returnInput()
+        }
     };
     const input_wrapper = document.querySelector('#inputs');
     input_wrapper.style.opacity = '1';
     input_wrapper.style.height = 'auto';
-    const input = document.querySelector('#fourth-field');
     switch (method_text_change) {
         case 'classroom':
-            field.first.innerText = text_object.classroom.classroom;
-            field.first.setAttribute('value', 'classroom');
-            field.second.innerText = text_object.classroom.max_people;
-            field.second.setAttribute('value', 'max-people');
-            field.third.innerText = text_object.classroom.main_subjects;
-            field.third.setAttribute('value', 'main-subjects');
-            field.fourth.style.display = 'none';
-            input.style.display = 'none';
+            field.label.first.innerText = text_object.classroom.classroom;
+            field.label.first.setAttribute('value', 'classroom');
+            field.input.first.setAttribute('type', 'number');
+            field.label.second.innerText = text_object.classroom.max_people;
+            field.label.second.setAttribute('value', 'max-people');
+            field.input.second.setAttribute('type', 'number');
+            field.label.third.innerText = text_object.classroom.main_subjects;
+            field.label.third.setAttribute('value', 'main-subjects');
+            field.input.third.setAttribute('type', 'text');
+            field.label.fourth.style.display = 'none';
+            field.input.fourth.style.display = 'none';
             break;
         case 'teachers':
-            field.first.innerText = text_object.teachers.name;
-            field.first.setAttribute('value', 'name');
-            field.second.innerText = text_object.teachers.surname;
-            field.second.setAttribute('value', 'surname');
-            field.third.innerText = text_object.teachers.age;
-            field.third.setAttribute('value', 'age');
-            field.fourth.innerText = text_object.teachers.subjects;
-            field.fourth.setAttribute('value', 'subjects');
-            field.fourth.style.display = 'block';
-            input.style.display = 'block';
+            field.label.first.innerText = text_object.teachers.name;
+            field.label.first.setAttribute('value', 'name');
+            field.input.first.setAttribute('type', 'text');
+            field.label.second.innerText = text_object.teachers.surname;
+            field.label.second.setAttribute('value', 'surname');
+            field.input.second.setAttribute('type', 'text');
+            field.label.third.innerText = text_object.teachers.age;
+            field.label.third.setAttribute('value', 'age');
+            field.input.third.setAttribute('type', 'number');
+            field.label.fourth.innerText = text_object.teachers.subjects;
+            field.label.fourth.setAttribute('value', 'subjects');
+            field.input.fourth.setAttribute('type', 'text');
+            field.label.fourth.style.display = 'block';
+            field.input.fourth.style.display = 'block';
             break;
         case 'subjects':
-            field.first.innerText = text_object.subjects.subject;
-            field.first.setAttribute('value', 'subject');
-            field.second.innerText = text_object.subjects.classroom;
-            field.second.setAttribute('value', 'classroom');
-            field.third.innerText = text_object.subjects.lessons_hours;
-            field.third.setAttribute('value', 'lessons_hours');
-            field.fourth.innerText = text_object.subjects.mandatory;
-            field.fourth.setAttribute('value', 'mandatory');
-            field.fourth.style.display = 'block';
-            input.style.display = 'block';
+            field.label.first.innerText = text_object.subjects.subject;
+            field.label.first.setAttribute('value', 'subject');
+            field.input.first.setAttribute('type', 'text');
+            field.label.second.innerText = text_object.subjects.classroom;
+            field.label.second.setAttribute('value', 'classroom');
+            field.input.second.setAttribute('type', 'number');
+            field.label.third.innerText = text_object.subjects.lessons_hours;
+            field.label.third.setAttribute('value', 'lessons_hours');
+            field.input.third.setAttribute('type', 'number');
+            field.label.fourth.innerText = text_object.subjects.mandatory;
+            field.label.fourth.setAttribute('value', 'mandatory');
+            field.input.fourth.setAttribute('type', 'text');
+            field.label.fourth.style.display = 'block';
+            field.input.fourth.style.display = 'block';
             break;
         default:
             break;
@@ -302,6 +325,10 @@ function getDataFromServer(data_user) {
             url = `${base_url}/${data_user.database_check}?${createQuery()}`;
             const res = yield sendToServerGet(url);
             const return_data = yield res.json();
+            if (typeof return_data === 'string') {
+                displayMessage(return_data);
+                return return_data;
+            }
             return_data.forEach(el => {
                 displayResult(el.data, el.id);
             });
@@ -404,6 +431,13 @@ function displayResult(data, id, method) {
     }
     ;
     createList(data, id);
+}
+;
+function displayMessage(msg) {
+    const p_element = document.createElement('p');
+    const select_div = document.querySelector('#display-status');
+    select_div.insertAdjacentElement('beforeend', p_element);
+    p_element.textContent = msg;
 }
 ;
 console.log("Loaded client");

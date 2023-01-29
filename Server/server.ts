@@ -34,7 +34,7 @@ server.get('/teachers?:id', (req, res) => {
         return res.status(400).send('failed to received')
     };
     if (typeof query !== 'string') {
-         return_data = searchTeacher(String(query.name));
+         return_data = searchTeacher(query);
     }
     else
         return_data = returnTeacherInfo(`${query}`);
@@ -43,7 +43,10 @@ server.get('/teachers?:id', (req, res) => {
                 id: el.id, 
                 data: returnTeacherInfo(el.id)};
     });
-    res.status(200).json(return_array);
+    if (return_data.length === 0) 
+        res.status(200).json('Did not found teacher. Please try again or try other search parameters.')
+    else
+        res.status(200).json(return_array);
 });
 
 server.post('/:database', (req, res) => {
@@ -59,7 +62,7 @@ server.post('/:database', (req, res) => {
         console.log(`Cannot add new teacher`);
         return res.status(200).json(`Data received. Name, surname and at least one subject is mandatory!!!`);
     };
-    return_data = searchTeacher(data.name, data.surname, data.age, data.subjects);
+    return_data = searchTeacher(data);
     if (return_data.length !== 0) {
         return_data.forEach(el => {
             return_array[return_array.length] = {
@@ -68,7 +71,7 @@ server.post('/:database', (req, res) => {
         });
         return res.status(200).json(return_array);
     };
-    const add_result: boolean = addNewTeacher(data.name, data.surname, data.subjects, data.age);
+    const add_result: boolean = addNewTeacher(data);
     if (add_result === true) {
         console.log(`Added new teacher`);
         return res.status(200).json(`Data received. Added new teacher`);
@@ -81,7 +84,7 @@ server.delete('/teachers', (req, res) => {
         return res.status(400).send('failed to received')
     };
     if (data.method_checked === 'DELETE'){
-        const teacher = searchTeacher(data.name, data.surname, data.age, data.subjects)
+        const teacher = searchTeacher(data)
         const finish: boolean = removeTeacher(teacher);
         console.log(`Removing teacher finished with status ${finish}`);
         res.status(200).send(`Data received. Removed teacher ${data.name, data.surname, data.age, data.subject}`);

@@ -32,7 +32,7 @@ body {
 }
 
 #method-wrapper, #database-wrapper {
-    width: 8em;
+    width: fit-content;
     padding: 0.5em;
     margin: 0 auto;
     display: flex;
@@ -40,16 +40,68 @@ body {
 }
 
 #method-wrapper > .input, #database-wrapper > .input {
-    width: fit-content;
+    display: flex;
+    align-items: center;
+    height: 1.5em;
+    margin: 0.2em;
+    border-radius: 2em;
+    background-color: rgb(133 133 133);
 }
+
+input[type="radio"]{
+    height: 1rem;
+    width: 1rem;
+    margin: 0.25rem;
+} 
 
 #method-wrapper > .input > label, #database-wrapper > .input > label {
     display: inline-block;
-    width: 6em;
+    width: 7em;
 }
 
-#input {
-    width: 11em;
+#method-add-wrapper {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+#method-add-button-wrapper {
+    width: 3em;
+    height: 1.2em;
+    border-width: 0.1em;
+    border-radius: 1em;
+}
+
+.add-wrapper-on {
+    background-color: rgb(13, 160, 0);
+    transition: 1s all ease-in-out;
+}
+
+.add-wrapper-off {
+    background-color: rgb(133 133 133);
+    transition: 1s all ease-in-out;
+}
+
+.add-off {
+    position: relative;
+    top: -0.2em;
+    left: -0.1em;
+    rotate: 180deg;
+    transition: 1s all ease-in-out;
+}
+
+.add-on {
+    position: relative;
+    top: -0.2em;
+    left: 1.8em;
+    rotate: 0deg;
+    transition: 1s all ease-in-out;
+}
+
+#method-add-button-wrapper > button {
+    width: 1.8em;
+    height: 1.8em;
+    border-radius: 1em;
+    border-color: rgb(133 133 133);
 }
 
 #inputs {
@@ -87,7 +139,7 @@ body {
     margin: 0 auto;
 }
 
-#tak {
+#yes-button {
     color: rgb(250, 235, 215);
     background-color: rgb(2, 145, 50);
     border-color: rgb(236, 236, 236);
@@ -95,7 +147,7 @@ body {
     border-width: .1em;
 }
 
-#nie {
+#no-button {
     color: rgb(250, 235, 215);
     background-color: rgb(145, 2, 2);
     border-color: rgb(236, 236, 236);
@@ -134,4 +186,17 @@ body {
 li::marker {
     content: '> ';
     font-weight: bold;
+}
+
+#display-status {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+#display-status > p {
+    width: 14em;
+    text-align: center;
+    padding: 1em;
+    background-color: rgb(133 133 133);
+    border-radius: 1em;
 }

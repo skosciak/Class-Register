@@ -14,25 +14,26 @@
             <h3>Wybierz skąd pobrać dane:</h3>
             <div id="database-wrapper">
                 <div class="input">
-                    <label for="database-teachers">Nauczyciele</label>
+                    <label for="database-teachers">&nbsp&nbspNauczyciele</label>
                     <input type="radio" name="database" class="database first-step" id="database-teachers" value="teachers">
                 </div>
                 <div class="input">
-                    <label for="database-classroom">Klasy</label>
+                    <label for="database-classroom">&nbsp&nbspKlasy</label>
                     <input type="radio" name="database" class="database first-step" id="database-classroom" value="classroom">
                 </div>
                 <div class="input">
-                    <label for="database-subjects">Przedmioty</label>
+                    <label for="database-subjects">&nbsp&nbspPrzedmioty</label>
                     <input type="radio" name="database" class="database first-step" id="database-subjects" value="subjects">
                 </div>
             </div>
             <h3>Czy chcesz dodać dane które zaraz wpiszesz?</h3>
-            <div class="input">
-                <label for="method-add">Dodaj</label>
-                <input type="radio" name="method" class="method" id="method-add" value="POST">
+            <div id="method-add-wrapper">
+                <div id="method-add-button-wrapper" class="add-wrapper-off">
+                    <button id="method-add-button" class="add-off"></button>
+                </div>
             </div>
             <div id="inputs">
-                <h3>Wpisz danę:</h3>
+                <h3>Wpisz danę do wyszukania:</h3>
                 <label id="first-field-label" for="first-field"></label>
                 <input type="text" class="input write" id="first-field" name="first-field">
                 <label id="second-field-label" for="second-field"></label>
@@ -48,15 +49,15 @@
             <h3>Wybierz działanie:</h3>
             <div id="method-wrapper">
                 <div class="input">
-                    <label for="method-remove">Usuń</label>
+                    <label for="method-remove">&nbsp&nbspUsuń</label>
                     <input type="radio" name="method" class="method" id="method-remove" value="DELETE">
                 </div>
                 <div class="input">
-                    <label for="method-modify">Modyfikuj</label>
+                    <label for="method-modify">&nbsp&nbspModyfikuj</label>
                     <input type="radio" name="method" class="method" id="method-modify" value="MODIFY">
                 </div>
                 <div class="input">
-                    <label for="method-search">Szukaj</label>
+                    <label for="method-search">&nbsp&nbspSzukaj</label>
                     <input type="radio" name="method" class="method" id="method-search" value="GET">
                 </div>
             </div>
@@ -65,12 +66,13 @@
         <form id="force-post" style="display: none">
             <h3>Znaleziono wynik który pasuje do Twoich danych. Czy mimo to chcesz dodać do bazy danych?</h3>
             <div>
-                <button id="tak">Tak</button>
-                <button id="nie">Nie</button>
+                <button id="yes-button">Tak</button>
+                <button id="no-button">Nie</button>
             </div>
         </form>
         <div id="display-status">
         </div>
     <script type = 'module' src='scripts/client.js'></script>
+    <script type = 'module' src='scripts/validation.js'></script>
     </body>
 </html>
