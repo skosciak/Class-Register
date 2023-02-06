@@ -14,54 +14,97 @@ function validateInputAfterSubmit(e: any) {
         el.setAttribute('style', 'border-color: rgb(253 15 15)');
         el.value = '';
         el.placeholder = `Wprowadzono niepoprawne dane. Typ danych: ${el.type}`;
+        return true;
     };
+
+    function clearAll() {
+        first_input.value = '';
+        second_input.value = '';
+        third_input.value = '';
+        fourth_input.value = '';
+    }
 
     const first_input = document.querySelector('#first-field') as HTMLInputElement;
     const second_input = document.querySelector('#second-field') as HTMLInputElement;
     const third_input = document.querySelector('#third-field') as HTMLInputElement;
     const fourth_input = document.querySelector('#fourth-field') as HTMLInputElement;
 
-    const letters = /^[A-Za-z]+$/;
 
     const button_submit = document.querySelector('#submit') as HTMLButtonElement;
-    button_submit.addEventListener('click', () => {
+    button_submit.addEventListener('click', (button_submit_event) => {
+
+        
+        const letters = /\p{L}/gu;
+
         switch (e.target.id) {
             case 'database-teachers':
-                if (!first_input.value.match(letters) && !(first_input.value === ''))
+                if (!first_input.value.match(letters) && !(first_input.value === '')) {
+                    clearAll();
                     setErrorMsg(first_input);
-                if (!second_input.value.match(letters) && !(second_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if (!second_input.value.match(letters) && !(second_input.value === '')) {
+                    clearAll();
                     setErrorMsg(second_input);
-                if (!(typeof Number(third_input) === 'number') && !(third_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if (!(typeof Number(third_input) === 'number') && !(third_input.value === '')) {
+                    clearAll();
                     setErrorMsg(third_input);
-                if (!fourth_input.value.match(letters) && !(fourth_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if (!fourth_input.value.match(letters) && !(fourth_input.value === '')) {
+                    clearAll();
                     setErrorMsg(fourth_input);
+                    button_submit_event.preventDefault();
+                };
                 break;
 
             case 'database-classroom':
-                if(!(typeof first_input === 'number') && !(first_input.value === ''))
+                if(!(typeof first_input === 'number') && !(first_input.value === '')) {
+                    clearAll();
                     setErrorMsg(first_input);
-                if(!(typeof second_input === 'number') && !(second_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if(!(typeof second_input === 'number') && !(second_input.value === '')) {
+                    clearAll();
                     setErrorMsg(second_input);
-                if(third_input.value.match(letters) && !(third_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if(third_input.value.match(letters) && !(third_input.value === '')) {
+                    clearAll();
                     setErrorMsg(third_input);
+                    button_submit_event.preventDefault();
+                };
                 break;
 
             case 'database-subjects':
-                if (!first_input.value.match(letters) && !(first_input.value === ''))
+                if (!first_input.value.match(letters) && !(first_input.value === '')) {
+                    clearAll();
                     setErrorMsg(first_input);
-                if(!(typeof second_input === 'number') && !(second_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if(!(typeof second_input === 'number') && !(second_input.value === '')) {
+                    clearAll();
                     setErrorMsg(second_input);
-                if (!(typeof third_input === 'number') && !(third_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if (!(typeof third_input === 'number') && !(third_input.value === '')) {
+                    clearAll();
                     setErrorMsg(third_input);
-                if (!fourth_input.value.match(letters) && !(fourth_input.value === ''))
+                    button_submit_event.preventDefault();
+                };
+                if (!fourth_input.value.match(letters) && !(fourth_input.value === '')) {
+                    clearAll();
                     setErrorMsg(fourth_input);
+                    button_submit_event.preventDefault();
+                };
                 break;
         
             default:
                 break;
         };
-    });
-    console.log(e.target.id);
+    }, {capture: true});
 };
 
 console.log('Validation loaded');

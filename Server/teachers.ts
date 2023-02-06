@@ -12,8 +12,8 @@ type teacher = {
 export function addNewTeacher (teacher: teacher) {
     teacher.name.toLowerCase();
     teacher.surname.toLowerCase(),
-    teacher.age,
-    teacher.subjects?.map(subjects => subjects.toLowerCase())
+    teacher?.age,
+    teacher.subjects.map(subjects => subjects.toLowerCase())
     if (teacher.age === (null || undefined))
         delete teacher.age;
     const open_file = './Server/Database/teachers.json';
@@ -22,7 +22,10 @@ export function addNewTeacher (teacher: teacher) {
     read_file.teachers[id] = teacher;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
-    return true;
+    return {
+        status: true,
+        id: id
+    };
 };
 
 function returnFirstFreeID() {

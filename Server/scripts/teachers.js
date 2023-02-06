@@ -1,11 +1,10 @@
 import * as fs from 'fs';
 import { openFile, searchIfKeyExist } from './reusable.js';
 export function addNewTeacher(teacher) {
-    var _a;
     teacher.name.toLowerCase();
     teacher.surname.toLowerCase(),
-        teacher.age,
-        (_a = teacher.subjects) === null || _a === void 0 ? void 0 : _a.map(subjects => subjects.toLowerCase());
+        teacher === null || teacher === void 0 ? void 0 : teacher.age,
+        teacher.subjects.map(subjects => subjects.toLowerCase());
     if (teacher.age === (null || undefined))
         delete teacher.age;
     const open_file = './Server/Database/teachers.json';
@@ -14,7 +13,10 @@ export function addNewTeacher(teacher) {
     read_file.teachers[id] = teacher;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
-    return true;
+    return {
+        status: true,
+        id: id
+    };
 }
 ;
 function returnFirstFreeID() {

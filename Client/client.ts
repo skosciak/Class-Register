@@ -2,8 +2,40 @@ const base_url = 'http://localhost:5500';
 
 /*
     To do: 
-        - Switch border when selected input
+        - After selecting POST delete MODIFY, DELETE, GET.
 */
+
+
+type returnedData = {
+    name: string,
+    surname: string,
+    age: number,
+    subjects: Array<string>
+};
+
+type serverReponse = {
+    msg: string,
+    code: number,
+    data?: Array<Object> | Object;
+};
+
+class ServerData {
+    msg: string;
+    code: number;
+    data?: Array<Object> | Object;
+
+    constructor(serverResponse: serverReponse) {
+        if (serverResponse.data !== undefined){
+            this.msg = serverResponse.msg,
+            this.code = Number(serverResponse.code),
+            this.data = serverResponse.data
+        }
+        else {
+            this.msg = serverResponse.msg,
+            this.code = Number(serverResponse.code)
+        }
+    }
+}
 
 type input = {
     database_check?: string,
@@ -20,29 +52,11 @@ type short_input = {
     method_check: string,
 };
 
-const text_object = {
-    teachers: {
-        name: 'Imie',
-        surname: 'Nazwisko',
-        age: 'Wiek',
-        subjects: 'Przedmioty'
-    },
-    classroom: {
-        classroom: 'Numer pokoju',
-        max_people: 'Maksymalna ilość ludzi',
-        main_subjects: 'Przedmioty w klasie' 
-    },
-    subjects: {
-        subject: 'Nazwa przedmiotu',
-        classroom: 'W klasie nr',
-        lessons_hours: 'Ilość godzin lekcyjnych',
-        mandatory: 'Czy obowiązkowe'
-    }
-};
-
 window.addEventListener("DOMContentLoaded", () => {
     console.log("DOM Loaded");
     console.log('Checking connection with server...');
+
+    const btn_user = document.querySelector('#submit') as HTMLButtonElement;
     //Checking if server is online or offline
     checkServerStatus().then(x => {     
         if (x === true)
@@ -51,27 +65,15 @@ window.addEventListener("DOMContentLoaded", () => {
             console.error('Could not connect to server');
     });
 
-    //Adding event listener to which database user chosen
-    const btn_method: NodeListOf<HTMLInputElement> = document.querySelectorAll('.first-step') as NodeListOf<HTMLInputElement>;
-    btn_method.forEach(el => {
-        el.addEventListener('click', () => switchText(el.value));
-    });
-
-    const add_method_button: HTMLButtonElement = document.querySelector('#method-add-button') as HTMLButtonElement;
-    add_method_button.addEventListener('click', (event) => {
-        const add_method_button_wrapper: HTMLDivElement = document.querySelector('#method-add-button-wrapper') as HTMLDivElement;
-        add_method_button.classList.toggle('add-off');
-        add_method_button.classList.toggle('add-on');
-        add_method_button_wrapper.classList.toggle('add-wrapper-off');
-        add_method_button_wrapper.classList.toggle('add-wrapper-on');
-        event.preventDefault();
-    });
-
     //Adding event listener to button with id submit
-    const btn_user = document.querySelector('#submit') as HTMLButtonElement;
-    btn_user.addEventListener("click", (event) => {
-        let progress: string = 'user';
+    btn_user.addEventListener("click", (event_client) => {
+        let progress: string = 'first-step';
         let database_temp: string = '';
+
+        //Function returning data from server or string with error message
+        const dataResponce = async () => { 
+            await getDataFromServer(input as input);
+        };
 
         //Saving data which user input
         let input = Input(progress, false) as input | boolean;
@@ -82,30 +84,37 @@ window.addEventListener("DOMContentLoaded", () => {
         //If the user did not select database input returned a boolean value
         if (input === false) {
             window.alert('Did not select database.');
-            event.preventDefault();
+            event_client.preventDefault();
             return;
         };
 
         //If type is not boolean function start working with data
         if (typeof input !== 'boolean') {
 
-            //Function returning data from server or string with error message
-            const dataResponce = async () => { 
-                let data_server: Object | string = await getDataFromServer(input as input);
-                if (typeof data_server === 'string' && typeof input !== "boolean") {
-                    console.warn(data_server);
-                    return false;
-                };
-                return data_server
-            };
+            let input_no_data: number = 4;
+
+            if (input.database_check === 'classroom')
+                input_no_data = 3;
+            if (input.age === 0)
+                input_no_data--;
+            if (input.name === '')
+                input_no_data--;
+            if (input.subjects.length === 1 && input.subjects[0] === '')
+                input_no_data--;
+            if (input.surname === '')
+                input_no_data--;
+
+            if (input_no_data === 0)
+                return;
+
             console.log(input);
             dataResponce();
         };
         
         //This menu only shows when user did not select add method.
         const btn_server = document.querySelector('#submit-to-server') as HTMLButtonElement;
-        btn_server.addEventListener("click", () => {
-            progress = 'server';
+        btn_server.addEventListener("click", (event_server) => {
+            progress = 'second-step';
             
             //We cleared all inputs before and need to send whole input type data.
             if (typeof input !== 'boolean')
@@ -113,11 +122,11 @@ window.addEventListener("DOMContentLoaded", () => {
             input = Input(progress, false) as input | boolean;
             if (typeof input !== 'boolean') {
                 input.database_check = database_temp;
-                getDataFromServer(input);
+                dataResponce();
             };
+            event_server.preventDefault();
         });
-
-        event.preventDefault();
+        event_client.preventDefault();
     });
 });
 
@@ -141,9 +150,9 @@ function Input(progress: string, clear_input: boolean) {
         return true;
     }
 
-    if (progress === 'user') {
+    if (progress === 'first-step') {
         let database_check: string = '';
-        const post_method: HTMLInputElement = document.querySelector('#method-add-button') as HTMLInputElement;
+        const post_method: HTMLButtonElement = document.querySelector('#method-add-button') as HTMLButtonElement;
         const database: NodeListOf<HTMLInputElement> = document.querySelectorAll('.database') as NodeListOf<HTMLInputElement>;
         database.forEach(x => {
             if(x.checked === true)
@@ -158,7 +167,7 @@ function Input(progress: string, clear_input: boolean) {
         const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
         const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
         const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
-        const method_check: string = post_method.value;
+        const method_check: string = 'POST';
 
         if (post_method.className === 'add-on')
             return {database_check, name, surname, age, subjects, method_check};
@@ -166,7 +175,7 @@ function Input(progress: string, clear_input: boolean) {
             return {database_check, name, surname, age, subjects}
     };
 
-    if (progress === 'server') {
+    if (progress === 'secomd-step') {
         let method_check: string = '';
         const method: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.method'));
         method.forEach(x => {
@@ -187,105 +196,9 @@ function Input(progress: string, clear_input: boolean) {
     return false;
 };
 
-//Function switch text when user change databases
-function switchText(method_text_change: string) {
-
-    class input_field {
-        public field: string;
-
-        constructor(id: string) {
-            this.field = id;
-        };
-
-        returnLabel() {
-            return document.querySelector(`#${this.field}`) as HTMLLabelElement;
-        };
-
-        returnInput() {
-            return document.querySelector(`#${this.field}`) as HTMLInputElement;
-        };
-    };
-
-    const field = {
-        label: {
-            first: new input_field('first-field-label').returnLabel(),
-            second: new input_field('second-field-label').returnLabel(),
-            third: new input_field('third-field-label').returnLabel(),
-            fourth: new input_field('fourth-field-label').returnLabel()
-        },
-        input: {
-            first: new input_field('first-field').returnInput(),
-            second: new input_field('second-field').returnInput(),
-            third: new input_field('third-field').returnInput(),
-            fourth: new input_field('fourth-field').returnInput()
-        }
-    };
-
-    const input_wrapper = document.querySelector('#inputs') as HTMLDivElement;
-    input_wrapper.style.opacity = '1';
-    input_wrapper.style.height = 'auto';
-    switch (method_text_change) {
-        case 'classroom':
-            field.label.first.innerText = text_object.classroom.classroom;
-            field.label.first.setAttribute('value', 'classroom');
-            field.input.first.setAttribute('type', 'number');
-            field.label.second.innerText = text_object.classroom.max_people;
-            field.label.second.setAttribute('value', 'max-people');
-            field.input.second.setAttribute('type', 'number');
-            field.label.third.innerText = text_object.classroom.main_subjects;
-            field.label.third.setAttribute('value', 'main-subjects');
-            field.input.third.setAttribute('type', 'text');
-            field.label.fourth.style.display = 'none';
-            field.input.fourth.style.display = 'none';
-            break;
-
-        case 'teachers':
-            field.label.first.innerText = text_object.teachers.name;
-            field.label.first.setAttribute('value', 'name');
-            field.input.first.setAttribute('type', 'text');
-            field.label.second.innerText = text_object.teachers.surname;
-            field.label.second.setAttribute('value', 'surname');
-            field.input.second.setAttribute('type', 'text');
-            field.label.third.innerText = text_object.teachers.age;
-            field.label.third.setAttribute('value', 'age');
-            field.input.third.setAttribute('type', 'number');
-            field.label.fourth.innerText = text_object.teachers.subjects;
-            field.label.fourth.setAttribute('value', 'subjects');
-            field.input.fourth.setAttribute('type', 'text');
-            field.label.fourth.style.display = 'block';
-            field.input.fourth.style.display = 'block';
-            break;
-
-        case 'subjects':
-            field.label.first.innerText = text_object.subjects.subject;
-            field.label.first.setAttribute('value', 'subject');
-            field.input.first.setAttribute('type', 'text');
-            field.label.second.innerText = text_object.subjects.classroom;
-            field.label.second.setAttribute('value', 'classroom');
-            field.input.second.setAttribute('type', 'number');
-            field.label.third.innerText = text_object.subjects.lessons_hours;
-            field.label.third.setAttribute('value', 'lessons_hours');
-            field.input.third.setAttribute('type', 'number');
-            field.label.fourth.innerText = text_object.subjects.mandatory;
-            field.label.fourth.setAttribute('value', 'mandatory');
-            field.input.fourth.setAttribute('type', 'text');
-            field.label.fourth.style.display = 'block';
-            field.input.fourth.style.display = 'block';
-            break;
-
-        default:
-            break;
-    };
-};
-
 //Function sending data to server as query or user data
-//'data_user' - only accepts data with type input
-async function getDataFromServer(data_user: input) {
-
-    type returnedData = {
-        data: Object,
-        id: string
-    };
+//'data_to_send' - only accepts data with type input
+async function getDataFromServer(data_to_send: input) {
 
     //Function only for 'GET' method
     //'url' - 'GET' method only send data in form of query
@@ -301,28 +214,31 @@ async function getDataFromServer(data_user: input) {
 
     //Function for 'POST', 'DELETE', 'PATCH'
     //'url' - uses as short url to show which database we want to use
-    //In body we pass 'data_user' with data inserted by user
+    //In body we pass 'data_to_send' with data inserted by user
     async function sendToServer(url: string) {
+        const method_check = data_to_send.method_check;
+        delete data_to_send.method_check;
+        delete data_to_send.database_check;
         const res = await fetch (url, {
-            method: data_user.method_check,
+            method: method_check,
             headers: {
                 'Content-type': 'application/json; charset="utf-8"',
                 },
-            body: JSON.stringify(data_user)
+            body: JSON.stringify(data_to_send)
         });
         return res;
     };
 
     //Function delete unused keys.
     function deleteKeys() {
-        for (const key in data_user) {
-            if (data_user[key as keyof input] === '' || undefined || null)
-                delete data_user[key as keyof input];
-            if (typeof data_user[key as keyof input] === 'number' && data_user[key as keyof input] === 0)
-                delete data_user[key as keyof input];
+        for (const key in data_to_send) {
+            if (data_to_send[key as keyof input] === '' || undefined || null)
+                delete data_to_send[key as keyof input];
+            if (typeof data_to_send[key as keyof input] === 'number' && data_to_send[key as keyof input] === 0)
+                delete data_to_send[key as keyof input];
             if (key === 'subjects') {
-                if (data_user.subjects?.length === 1 && data_user.subjects[0].length === 0)
-                    delete data_user[key as keyof input];
+                if (data_to_send.subjects?.length === 1 && data_to_send.subjects[0].length === 0)
+                    delete data_to_send[key as keyof input];
             };
         };
     };
@@ -330,7 +246,7 @@ async function getDataFromServer(data_user: input) {
     //Function creates query for 'GET' method
     function createQuery() {
         let query_URI: string = '';
-        const query_data: input = { ...data_user };
+        const query_data: input = { ...data_to_send };
         delete query_data.database_check;
         for (const key in query_data) {
             if (query_URI === '')
@@ -347,39 +263,51 @@ async function getDataFromServer(data_user: input) {
     //If 'method_check' is not present function first check if data is not present in databases
     //If it returns data function will display it for easier use.
     //If 'method_check' is present it means that we want to do a specific task to proceed
-    if (data_user.method_check === undefined) {
-        url = `${base_url}/${data_user.database_check}?${createQuery()}`;
+    if (data_to_send.method_check === undefined) {
+        url = `${base_url}/${data_to_send.database_check}?${createQuery()}`;
         const res = await sendToServerGet(url);
-        const return_data: returnedData[] = await res.json();
-        if (typeof return_data === 'string'){
-            displayMessage(return_data);
+        const return_data: serverReponse = new ServerData(await res.json());
+        if (return_data.code === 0o0013){
+            displayMessage(return_data.msg);
             return return_data;
         }
-        return_data.forEach(el => {
+        if (return_data.data !== undefined && Array.isArray(return_data.data))
+        return_data.data.forEach(el => {
             displayResult(el.data, el.id);
         });
         return return_data;
     }
     else {
-        url = `${base_url}/${data_user.database_check}`;
+        url = `${base_url}/${data_to_send.database_check}`;
         const res = await sendToServer(url);
-        const return_data: returnedData[] = await res.json();
-        if (typeof return_data === 'string') {
-            console.warn('Cannot add new teacher. Name, surname and at least one subject is mandatory!!!');
-            return return_data;
-        }
-        else {
-            return_data.forEach(el => {
-                displayResult(el.data, el.id, data_user.method_check);
-            });
-            return return_data;
+        const return_data: serverReponse = new ServerData(await res.json());
+        switch (return_data.code) {
+            case 0o0001:
+                displayMessage(return_data.msg);
+                break;
+
+            case 0o0002:
+                displayMessage(return_data.msg);
+                break;
+
+            case 0o0011:
+                displayMessage(return_data.msg);
+                break;
+
+            case 0o0101:
+                displayMessage(return_data.msg);
+                break;
+
+            default:
+                console.log('Something went wrong.');
+                console.log(return_data);
+                break;
         };
     };
 };
 
 //Simply synchronus function to check if server is online or offline
 function checkServerStatus() {
-    let return_response: boolean;
     const res = fetch (`${base_url}/server_status`, 
     {
         method: 'GET',
@@ -388,9 +316,9 @@ function checkServerStatus() {
        }
     });
 
-    return res.then (res => {
-        console.log(res.status);
-        if(res.status === 200) {
+    return res.then (response => {
+        console.log(response.status);
+        if(response.status === 200) {
             return true;
         } else 
             return false;
@@ -401,14 +329,7 @@ function checkServerStatus() {
 }
 
 //Function for displaying second step menus
-function displayResult(data: any, id: string, method?: string) {
-    //Displaying result
-    type returnedData = {
-        name: string,
-        surname: string,
-        age: number,
-        subjects: Array<string>
-    };
+function displayResult(data: returnedData, id: string, method?: string) {
 
     //If sent data for 'POST' method returns data from the server with similar data inserted by the user
     //On client side will appear simple menu for confirmation to realize his request even if the data is similar
@@ -419,9 +340,9 @@ function displayResult(data: any, id: string, method?: string) {
 
     //Function create list with id and data returned by server
     function createList(data: returnedData, id: string) {
-        const user_input = document.querySelector('#user-data') as HTMLFormElement;
+        const user_input = document.querySelector('#first-step') as HTMLFormElement;
         user_input.setAttribute('style', 'display: none');
-        const server_input = document.querySelector('#server-data') as HTMLFormElement;
+        const server_input = document.querySelector('#second-step') as HTMLFormElement;
         server_input.setAttribute('style', '');
         const display_status_box = document.querySelector('#display-status') as HTMLDivElement;
         const list = document.createElement('ul');
@@ -440,7 +361,7 @@ function displayResult(data: any, id: string, method?: string) {
             const select_p = document.getElementById(`${key}-${id}-p`) as HTMLParagraphElement;
             select_p.textContent = String(data[key as keyof returnedData]);
         };
-        list.addEventListener('click', (event) => {
+        list.addEventListener('click', (event: any) => {
             addFromListToInputs(event);
             list.classList.toggle('search-result-green');
         });
@@ -449,6 +370,7 @@ function displayResult(data: any, id: string, method?: string) {
     //Function inserts data from lists to hidden inputs which we can later use
     function addFromListToInputs(event: any) {
         const id = event.composedPath()[2].id;
+        console.log(id);
         const list = document.querySelector(`#${id}`) as HTMLUListElement;
         const inputs = document.querySelectorAll(`.write`) as NodeListOf<HTMLInputElement>;
         const li = list.childNodes as NodeListOf<HTMLLIElement>;

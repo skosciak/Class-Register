@@ -10,18 +10,18 @@
         <title>Class Register</title>
     </head>
     <body>
-        <form id="user-data">
+        <form id="first-step">
             <h3>Wybierz skąd pobrać dane:</h3>
             <div id="database-wrapper">
-                <div class="input">
+                <div class="input-wrapper">
                     <label for="database-teachers">&nbsp&nbspNauczyciele</label>
                     <input type="radio" name="database" class="database first-step" id="database-teachers" value="teachers">
                 </div>
-                <div class="input">
+                <div class="input-wrapper">
                     <label for="database-classroom">&nbsp&nbspKlasy</label>
                     <input type="radio" name="database" class="database first-step" id="database-classroom" value="classroom">
                 </div>
-                <div class="input">
+                <div class="input-wrapper">
                     <label for="database-subjects">&nbsp&nbspPrzedmioty</label>
                     <input type="radio" name="database" class="database first-step" id="database-subjects" value="subjects">
                 </div>
@@ -29,7 +29,7 @@
             <h3>Czy chcesz dodać dane które zaraz wpiszesz?</h3>
             <div id="method-add-wrapper">
                 <div id="method-add-button-wrapper" class="add-wrapper-off">
-                    <button id="method-add-button" class="add-off"></button>
+                    <button type="button" id="method-add-button" class="add-off"></button>
                 </div>
             </div>
             <div id="inputs">
@@ -45,21 +45,28 @@
                 <button id="submit">Szukaj</button>
             </div>
         </form>
-        <form id="server-data" style="display: none">
+        <form id="second-step" style="display: none">
             <h3>Wybierz działanie:</h3>
             <div id="method-wrapper">
-                <div class="input">
+                <div class="input-wrapper">
                     <label for="method-remove">&nbsp&nbspUsuń</label>
                     <input type="radio" name="method" class="method" id="method-remove" value="DELETE">
                 </div>
-                <div class="input">
+                <div class="input-wrapper">
                     <label for="method-modify">&nbsp&nbspModyfikuj</label>
                     <input type="radio" name="method" class="method" id="method-modify" value="MODIFY">
                 </div>
-                <div class="input">
-                    <label for="method-search">&nbsp&nbspSzukaj</label>
-                    <input type="radio" name="method" class="method" id="method-search" value="GET">
-                </div>
+            </div>
+            <div id="modify-wrapper" class="modify-unselected">
+                <h3>Wybierz które dane chcesz zaktualizować</h3>
+                <label id="first-field-label" for="first-field"></label>
+                <input type="text" class="input write" id="first-field" name="first-field">
+                <label id="second-field-label" for="second-field"></label>
+                <input type="text" class="input write" id="second-field" name="second-field">
+                <label id="third-field-label" for="third-field"></label>
+                <input type="number" class="input write" id="third-field" name="third-field">
+                <label id="fourth-field-label" for="fourth-field"></label>
+                <input type="text" class="input write" id="fourth-field" name="fourth-field">
             </div>
             <button id="submit-to-server">Finalizuj</button>
         </form>
@@ -74,5 +81,6 @@
         </div>
     <script type = 'module' src='scripts/client.js'></script>
     <script type = 'module' src='scripts/validation.js'></script>
+    <script type = 'module' src='scripts/styling.js'></script>
     </body>
 </html>

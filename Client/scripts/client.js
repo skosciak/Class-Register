@@ -9,28 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const base_url = 'http://localhost:5500';
-const text_object = {
-    teachers: {
-        name: 'Imie',
-        surname: 'Nazwisko',
-        age: 'Wiek',
-        subjects: 'Przedmioty'
-    },
-    classroom: {
-        classroom: 'Numer pokoju',
-        max_people: 'Maksymalna ilość ludzi',
-        main_subjects: 'Przedmioty w klasie'
-    },
-    subjects: {
-        subject: 'Nazwa przedmiotu',
-        classroom: 'W klasie nr',
-        lessons_hours: 'Ilość godzin lekcyjnych',
-        mandatory: 'Czy obowiązkowe'
+class ServerData {
+    constructor(serverResponse) {
+        if (serverResponse.data !== undefined) {
+            this.msg = serverResponse.msg,
+                this.code = Number(serverResponse.code),
+                this.data = serverResponse.data;
+        }
+        else {
+            this.msg = serverResponse.msg,
+                this.code = Number(serverResponse.code);
+        }
     }
-};
+}
 window.addEventListener("DOMContentLoaded", () => {
     console.log("DOM Loaded");
     console.log('Checking connection with server...');
+    const btn_user = document.querySelector('#submit');
     //Checking if server is online or offline
     checkServerStatus().then(x => {
         if (x === true)
@@ -38,25 +33,14 @@ window.addEventListener("DOMContentLoaded", () => {
         else
             console.error('Could not connect to server');
     });
-    //Adding event listener to which database user chosen
-    const btn_method = document.querySelectorAll('.first-step');
-    btn_method.forEach(el => {
-        el.addEventListener('click', () => switchText(el.value));
-    });
-    const add_method_button = document.querySelector('#method-add-button');
-    add_method_button.addEventListener('click', (event) => {
-        const add_method_button_wrapper = document.querySelector('#method-add-button-wrapper');
-        add_method_button.classList.toggle('add-off');
-        add_method_button.classList.toggle('add-on');
-        add_method_button_wrapper.classList.toggle('add-wrapper-off');
-        add_method_button_wrapper.classList.toggle('add-wrapper-on');
-        event.preventDefault();
-    });
     //Adding event listener to button with id submit
-    const btn_user = document.querySelector('#submit');
-    btn_user.addEventListener("click", (event) => {
-        let progress = 'user';
+    btn_user.addEventListener("click", (event_client) => {
+        let progress = 'first-step';
         let database_temp = '';
+        //Function returning data from server or string with error message
+        const dataResponce = () => __awaiter(void 0, void 0, void 0, function* () {
+            yield getDataFromServer(input);
+        });
         //Saving data which user input
         let input = Input(progress, false);
         //Clearing data in inputs for either choosing different data or staying clear
@@ -64,41 +48,45 @@ window.addEventListener("DOMContentLoaded", () => {
         //If the user did not select database input returned a boolean value
         if (input === false) {
             window.alert('Did not select database.');
-            event.preventDefault();
+            event_client.preventDefault();
             return;
         }
         ;
         //If type is not boolean function start working with data
         if (typeof input !== 'boolean') {
-            //Function returning data from server or string with error message
-            const dataResponce = () => __awaiter(void 0, void 0, void 0, function* () {
-                let data_server = yield getDataFromServer(input);
-                if (typeof data_server === 'string' && typeof input !== "boolean") {
-                    console.warn(data_server);
-                    return false;
-                }
-                ;
-                return data_server;
-            });
+            let input_no_data = 4;
+            if (input.database_check === 'classroom')
+                input_no_data = 3;
+            if (input.age === 0)
+                input_no_data--;
+            if (input.name === '')
+                input_no_data--;
+            if (input.subjects.length === 1 && input.subjects[0] === '')
+                input_no_data--;
+            if (input.surname === '')
+                input_no_data--;
+            if (input_no_data === 0)
+                return;
             console.log(input);
             dataResponce();
         }
         ;
         //This menu only shows when user did not select add method.
         const btn_server = document.querySelector('#submit-to-server');
-        btn_server.addEventListener("click", () => {
-            progress = 'server';
+        btn_server.addEventListener("click", (event_server) => {
+            progress = 'second-step';
             //We cleared all inputs before and need to send whole input type data.
             if (typeof input !== 'boolean')
                 database_temp = input.database_check;
             input = Input(progress, false);
             if (typeof input !== 'boolean') {
                 input.database_check = database_temp;
-                getDataFromServer(input);
+                dataResponce();
             }
             ;
+            event_server.preventDefault();
         });
-        event.preventDefault();
+        event_client.preventDefault();
     });
 });
 //Function save user input and have 3 options.
@@ -118,7 +106,7 @@ function Input(progress, clear_input) {
         subjects.innerText = '';
         return true;
     }
-    if (progress === 'user') {
+    if (progress === 'first-step') {
         let database_check = '';
         const post_method = document.querySelector('#method-add-button');
         const database = document.querySelectorAll('.database');
@@ -135,14 +123,14 @@ function Input(progress, clear_input) {
         const surname = document.querySelector("#second-field").value;
         const age = Number(document.querySelector("#third-field").value);
         const subjects = [document.querySelector("#fourth-field").value];
-        const method_check = post_method.value;
+        const method_check = 'POST';
         if (post_method.className === 'add-on')
             return { database_check, name, surname, age, subjects, method_check };
         else
             return { database_check, name, surname, age, subjects };
     }
     ;
-    if (progress === 'server') {
+    if (progress === 'secomd-step') {
         let method_check = '';
         const method = document.querySelectorAll('.method');
         method.forEach(x => {
@@ -164,95 +152,9 @@ function Input(progress, clear_input) {
     return false;
 }
 ;
-//Function switch text when user change databases
-function switchText(method_text_change) {
-    class input_field {
-        constructor(id) {
-            this.field = id;
-        }
-        ;
-        returnLabel() {
-            return document.querySelector(`#${this.field}`);
-        }
-        ;
-        returnInput() {
-            return document.querySelector(`#${this.field}`);
-        }
-        ;
-    }
-    ;
-    const field = {
-        label: {
-            first: new input_field('first-field-label').returnLabel(),
-            second: new input_field('second-field-label').returnLabel(),
-            third: new input_field('third-field-label').returnLabel(),
-            fourth: new input_field('fourth-field-label').returnLabel()
-        },
-        input: {
-            first: new input_field('first-field').returnInput(),
-            second: new input_field('second-field').returnInput(),
-            third: new input_field('third-field').returnInput(),
-            fourth: new input_field('fourth-field').returnInput()
-        }
-    };
-    const input_wrapper = document.querySelector('#inputs');
-    input_wrapper.style.opacity = '1';
-    input_wrapper.style.height = 'auto';
-    switch (method_text_change) {
-        case 'classroom':
-            field.label.first.innerText = text_object.classroom.classroom;
-            field.label.first.setAttribute('value', 'classroom');
-            field.input.first.setAttribute('type', 'number');
-            field.label.second.innerText = text_object.classroom.max_people;
-            field.label.second.setAttribute('value', 'max-people');
-            field.input.second.setAttribute('type', 'number');
-            field.label.third.innerText = text_object.classroom.main_subjects;
-            field.label.third.setAttribute('value', 'main-subjects');
-            field.input.third.setAttribute('type', 'text');
-            field.label.fourth.style.display = 'none';
-            field.input.fourth.style.display = 'none';
-            break;
-        case 'teachers':
-            field.label.first.innerText = text_object.teachers.name;
-            field.label.first.setAttribute('value', 'name');
-            field.input.first.setAttribute('type', 'text');
-            field.label.second.innerText = text_object.teachers.surname;
-            field.label.second.setAttribute('value', 'surname');
-            field.input.second.setAttribute('type', 'text');
-            field.label.third.innerText = text_object.teachers.age;
-            field.label.third.setAttribute('value', 'age');
-            field.input.third.setAttribute('type', 'number');
-            field.label.fourth.innerText = text_object.teachers.subjects;
-            field.label.fourth.setAttribute('value', 'subjects');
-            field.input.fourth.setAttribute('type', 'text');
-            field.label.fourth.style.display = 'block';
-            field.input.fourth.style.display = 'block';
-            break;
-        case 'subjects':
-            field.label.first.innerText = text_object.subjects.subject;
-            field.label.first.setAttribute('value', 'subject');
-            field.input.first.setAttribute('type', 'text');
-            field.label.second.innerText = text_object.subjects.classroom;
-            field.label.second.setAttribute('value', 'classroom');
-            field.input.second.setAttribute('type', 'number');
-            field.label.third.innerText = text_object.subjects.lessons_hours;
-            field.label.third.setAttribute('value', 'lessons_hours');
-            field.input.third.setAttribute('type', 'number');
-            field.label.fourth.innerText = text_object.subjects.mandatory;
-            field.label.fourth.setAttribute('value', 'mandatory');
-            field.input.fourth.setAttribute('type', 'text');
-            field.label.fourth.style.display = 'block';
-            field.input.fourth.style.display = 'block';
-            break;
-        default:
-            break;
-    }
-    ;
-}
-;
 //Function sending data to server as query or user data
-//'data_user' - only accepts data with type input
-function getDataFromServer(data_user) {
+//'data_to_send' - only accepts data with type input
+function getDataFromServer(data_to_send) {
     return __awaiter(this, void 0, void 0, function* () {
         //Function only for 'GET' method
         //'url' - 'GET' method only send data in form of query
@@ -270,15 +172,18 @@ function getDataFromServer(data_user) {
         ;
         //Function for 'POST', 'DELETE', 'PATCH'
         //'url' - uses as short url to show which database we want to use
-        //In body we pass 'data_user' with data inserted by user
+        //In body we pass 'data_to_send' with data inserted by user
         function sendToServer(url) {
             return __awaiter(this, void 0, void 0, function* () {
+                const method_check = data_to_send.method_check;
+                delete data_to_send.method_check;
+                delete data_to_send.database_check;
                 const res = yield fetch(url, {
-                    method: data_user.method_check,
+                    method: method_check,
                     headers: {
                         'Content-type': 'application/json; charset="utf-8"',
                     },
-                    body: JSON.stringify(data_user)
+                    body: JSON.stringify(data_to_send)
                 });
                 return res;
             });
@@ -287,14 +192,14 @@ function getDataFromServer(data_user) {
         //Function delete unused keys.
         function deleteKeys() {
             var _a;
-            for (const key in data_user) {
-                if (data_user[key] === '' || undefined || null)
-                    delete data_user[key];
-                if (typeof data_user[key] === 'number' && data_user[key] === 0)
-                    delete data_user[key];
+            for (const key in data_to_send) {
+                if (data_to_send[key] === '' || undefined || null)
+                    delete data_to_send[key];
+                if (typeof data_to_send[key] === 'number' && data_to_send[key] === 0)
+                    delete data_to_send[key];
                 if (key === 'subjects') {
-                    if (((_a = data_user.subjects) === null || _a === void 0 ? void 0 : _a.length) === 1 && data_user.subjects[0].length === 0)
-                        delete data_user[key];
+                    if (((_a = data_to_send.subjects) === null || _a === void 0 ? void 0 : _a.length) === 1 && data_to_send.subjects[0].length === 0)
+                        delete data_to_send[key];
                 }
                 ;
             }
@@ -304,7 +209,7 @@ function getDataFromServer(data_user) {
         //Function creates query for 'GET' method
         function createQuery() {
             let query_URI = '';
-            const query_data = Object.assign({}, data_user);
+            const query_data = Object.assign({}, data_to_send);
             delete query_data.database_check;
             for (const key in query_data) {
                 if (query_URI === '')
@@ -321,32 +226,41 @@ function getDataFromServer(data_user) {
         //If 'method_check' is not present function first check if data is not present in databases
         //If it returns data function will display it for easier use.
         //If 'method_check' is present it means that we want to do a specific task to proceed
-        if (data_user.method_check === undefined) {
-            url = `${base_url}/${data_user.database_check}?${createQuery()}`;
+        if (data_to_send.method_check === undefined) {
+            url = `${base_url}/${data_to_send.database_check}?${createQuery()}`;
             const res = yield sendToServerGet(url);
-            const return_data = yield res.json();
-            if (typeof return_data === 'string') {
-                displayMessage(return_data);
+            const return_data = new ServerData(yield res.json());
+            if (return_data.code === 0o0013) {
+                displayMessage(return_data.msg);
                 return return_data;
             }
-            return_data.forEach(el => {
-                displayResult(el.data, el.id);
-            });
+            if (return_data.data !== undefined && Array.isArray(return_data.data))
+                return_data.data.forEach(el => {
+                    displayResult(el.data, el.id);
+                });
             return return_data;
         }
         else {
-            url = `${base_url}/${data_user.database_check}`;
+            url = `${base_url}/${data_to_send.database_check}`;
             const res = yield sendToServer(url);
-            const return_data = yield res.json();
-            if (typeof return_data === 'string') {
-                console.warn('Cannot add new teacher. Name, surname and at least one subject is mandatory!!!');
-                return return_data;
-            }
-            else {
-                return_data.forEach(el => {
-                    displayResult(el.data, el.id, data_user.method_check);
-                });
-                return return_data;
+            const return_data = new ServerData(yield res.json());
+            switch (return_data.code) {
+                case 0o0001:
+                    displayMessage(return_data.msg);
+                    break;
+                case 0o0002:
+                    displayMessage(return_data.msg);
+                    break;
+                case 0o0011:
+                    displayMessage(return_data.msg);
+                    break;
+                case 0o0101:
+                    displayMessage(return_data.msg);
+                    break;
+                default:
+                    console.log('Something went wrong.');
+                    console.log(return_data);
+                    break;
             }
             ;
         }
@@ -356,16 +270,15 @@ function getDataFromServer(data_user) {
 ;
 //Simply synchronus function to check if server is online or offline
 function checkServerStatus() {
-    let return_response;
     const res = fetch(`${base_url}/server_status`, {
         method: 'GET',
         headers: {
             'Content-type': 'application/json; charset="utf-8"',
         }
     });
-    return res.then(res => {
-        console.log(res.status);
-        if (res.status === 200) {
+    return res.then(response => {
+        console.log(response.status);
+        if (response.status === 200) {
             return true;
         }
         else
@@ -386,9 +299,9 @@ function displayResult(data, id, method) {
     ;
     //Function create list with id and data returned by server
     function createList(data, id) {
-        const user_input = document.querySelector('#user-data');
+        const user_input = document.querySelector('#first-step');
         user_input.setAttribute('style', 'display: none');
-        const server_input = document.querySelector('#server-data');
+        const server_input = document.querySelector('#second-step');
         server_input.setAttribute('style', '');
         const display_status_box = document.querySelector('#display-status');
         const list = document.createElement('ul');
@@ -417,6 +330,7 @@ function displayResult(data, id, method) {
     //Function inserts data from lists to hidden inputs which we can later use
     function addFromListToInputs(event) {
         const id = event.composedPath()[2].id;
+        console.log(id);
         const list = document.querySelector(`#${id}`);
         const inputs = document.querySelectorAll(`.write`);
         const li = list.childNodes;
