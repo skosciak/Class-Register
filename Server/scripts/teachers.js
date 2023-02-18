@@ -1,12 +1,74 @@
 import * as fs from 'fs';
 import { openFile, searchIfKeyExist } from './reusable.js';
-export function addNewTeacher(teacher) {
-    teacher.name.toLowerCase();
-    teacher.surname.toLowerCase(),
-        teacher === null || teacher === void 0 ? void 0 : teacher.age,
-        teacher.subjects.map(subjects => subjects.toLowerCase());
-    if (teacher.age === (null || undefined))
-        delete teacher.age;
+class Teacher {
+    constructor(teacher) {
+        this.name = teacher.name;
+        this.surname = teacher.surname;
+        this.age = teacher.age;
+        this.subjects = teacher.subjects;
+    }
+    ;
+    deleteEmpty() {
+        if (this.name === undefined || this.name === '')
+            delete this.name;
+        if (this.surname === undefined || this.surname === '')
+            delete this.surname;
+        if (this.age === undefined || null)
+            delete this.age;
+        if (this.subjects === undefined || (this.subjects.length === 1 && this.subjects[0] === ''))
+            delete this.subjects;
+    }
+    ;
+    toLowerCaseMethod() {
+        if (this.name != undefined)
+            this.name = this.name.toLowerCase();
+        if (this.surname != undefined)
+            this.surname = this.surname.toLowerCase();
+        if (this.age != undefined)
+            this.age = parseInt(String(this.age));
+        if (this.subjects != undefined || (this.subjects != undefined && this.subjects.length !== 1 && this.subjects[0] !== ''))
+            if (Array.isArray(this.subjects))
+                this.subjects = this.subjects.map(subjects => subjects.toLowerCase());
+            else {
+                this.subjectsToArray(this.subjects);
+            }
+        ;
+    }
+    subjectsToArray(type_string) {
+        if (typeof this.subjects === 'string') {
+            let temp_subjects = type_string.split('');
+            let temp_array_start;
+            let temp_array_end;
+            let temp_array = [];
+            temp_subjects = temp_subjects.filter(letter => letter !== ' ');
+            for (let i = 0; i < temp_subjects.length; i++) {
+                if (temp_subjects[i] === '[')
+                    temp_array_start = i + 1;
+                if (temp_subjects[i] === ',' && temp_subjects[i - 1] === ',')
+                    i++;
+                else if (temp_subjects[i] === ',') {
+                    temp_array[temp_array.length] = temp_subjects.slice(temp_array_start, i).join('');
+                    if (temp_array[temp_array.length - 1] === '' || temp_array[temp_array.length - 1] === ' ')
+                        temp_array.pop();
+                    temp_array_start = i + 1;
+                }
+                ;
+                if (temp_subjects[i] === ']') {
+                    temp_array_end = i;
+                    temp_array[temp_array.length] = temp_subjects.slice(temp_array_start, temp_array_end).join('');
+                }
+                ;
+            }
+            ;
+            this.subjects = temp_array;
+        }
+        ;
+    }
+}
+export function addNewTeacher(data_from_server) {
+    const teacher = new Teacher(data_from_server);
+    teacher.deleteEmpty();
+    teacher.toLowerCaseMethod();
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     const id = returnFirstFreeID();
@@ -57,12 +119,10 @@ export function removeTeacher(id) {
     fs.writeFileSync(open_file, update_file);
     return true;
 }
-export function modifyTeacher(teacher, id) {
-    var _a;
-    teacher.name.toLowerCase();
-    teacher.surname.toLowerCase(),
-        teacher.age,
-        (_a = teacher.subjects) === null || _a === void 0 ? void 0 : _a.map(subjects => subjects.toLowerCase());
+export function modifyTeacher(data_from_server, id) {
+    const teacher = new Teacher(data_from_server);
+    teacher.deleteEmpty();
+    teacher.toLowerCaseMethod();
     for (const [key, value] of Object.entries(teacher)) {
         if (value === undefined || null)
             delete teacher[key];
@@ -73,37 +133,24 @@ export function modifyTeacher(teacher, id) {
         return false;
     }
     ;
-    if ((Object.keys(id)).length !== 1) {
-        console.warn("Returned more than one teacher matching search result! Please specify more information for search!");
-        return false;
-    }
-    ;
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     if (id !== undefined || null) {
         for (const key in teacher) {
-            read_file.teachers[id[0].id][key] = teacher[key];
+            read_file.teachers[id][key] = teacher[key];
         }
         ;
     }
     ;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
+    return true;
 }
 ;
-export function searchTeacher(teacher) {
-    if (teacher.name != undefined) {
-        teacher.name = teacher.name.toLowerCase();
-    }
-    if (teacher.surname != undefined) {
-        teacher.surname = teacher.surname.toLowerCase();
-    }
-    if (teacher.age && (teacher.age != undefined))
-        teacher.age = parseInt(String(teacher.age));
-    if (Array.isArray(teacher.subjects) && teacher.subjects != undefined) {
-        teacher.subjects = teacher.subjects.map(subjects => subjects.toLowerCase());
-    }
-    ;
+export function searchTeacher(data_from_server) {
+    const teacher = new Teacher(data_from_server);
+    teacher.deleteEmpty();
+    teacher.toLowerCaseMethod();
     const open_file = './Server/Database/teachers.json';
     const read_file = openFile(open_file, true);
     for (const [key, value] of Object.entries(teacher)) {
@@ -122,16 +169,16 @@ export function searchTeacher(teacher) {
     //Checking if subjects are existing.
     try {
         if (teacher.subjects.length > 0) {
-            subject_exist = (Object.keys(teacher)).length - 1;
+            subject_exist = teacher.subjects.length;
         }
         ;
     }
     catch (_a) {
-        if (teacher.subjects !== undefined || null) {
-            subject_exist = (Object.keys(teacher)).length - 1;
+        if (teacher.subjects !== undefined) {
+            subject_exist = teacher.subjects.length;
         }
         else {
-            subject_exist = (Object.keys(teacher)).length;
+            subject_exist = 0;
         }
     }
     ;
@@ -141,39 +188,35 @@ export function searchTeacher(teacher) {
                 count_matches++;
         }
         ;
-        if (count_matches === subject_exist) {
+        if (subject_exist === 0 && count_matches === (Object.keys(teacher)).length) {
+            match[match.length] = {
+                'id': id
+            };
             count_matches = 0;
-            if (teacher.subjects === undefined || null) {
-                match[match.length] = {
-                    'id': id
-                };
-            }
-            else if (read_file.teachers[id].subjects !== undefined) {
+        }
+        if (subject_exist > 0 && count_matches === ((Object.keys(teacher)).length - 1)) {
+            count_matches = 0;
+            if (read_file.teachers[id].subjects !== undefined) {
                 for (const subject of read_file.teachers[id].subjects) {
-                    if (typeof teacher.subjects != 'string') {
+                    if (Array.isArray(teacher.subjects)) {
                         for (const search_subject of teacher.subjects) {
                             if (subject === search_subject)
                                 count_matches++;
                         }
                         ;
-                        if (count_matches === (Object.keys(teacher.subjects)).length) {
-                            match[match.length] = {
-                                'id': id
-                            };
-                        }
-                        ;
-                    }
-                    ;
-                    if (subject === teacher.subjects) {
-                        match[match.length] = {
-                            'id': id
-                        };
                     }
                     ;
                 }
                 ;
+                if (count_matches === (Object.keys(teacher.subjects)).length) {
+                    match[match.length] = {
+                        'id': id
+                    };
+                }
+                ;
             }
             ;
+            count_matches = 0;
         }
         ;
         count_matches = 0;

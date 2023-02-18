@@ -32,6 +32,7 @@ export function searchIfKeyExist(inFile, key) {
         default:
             break;
     }
+    ;
 }
 ;
 //# sourceMappingURL=reusable.js.map

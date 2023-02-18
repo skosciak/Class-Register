@@ -1,11 +1,5 @@
 const base_url = 'http://localhost:5500';
 
-/*
-    To do: 
-        - After selecting POST delete MODIFY, DELETE, GET.
-*/
-
-
 type returnedData = {
     name: string,
     surname: string,
@@ -26,16 +20,16 @@ class ServerData {
 
     constructor(serverResponse: serverReponse) {
         if (serverResponse.data !== undefined){
-            this.msg = serverResponse.msg,
-            this.code = Number(serverResponse.code),
-            this.data = serverResponse.data
+            this.msg = serverResponse.msg;
+            this.code = Number(serverResponse.code);
+            this.data = serverResponse.data;
         }
         else {
-            this.msg = serverResponse.msg,
-            this.code = Number(serverResponse.code)
-        }
-    }
-}
+            this.msg = serverResponse.msg;
+            this.code = Number(serverResponse.code);
+        };
+    };
+};
 
 type input = {
     database_check?: string,
@@ -67,19 +61,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
     //Adding event listener to button with id submit
     btn_user.addEventListener("click", (event_client) => {
-        let progress: string = 'first-step';
         let database_temp: string = '';
 
         //Function returning data from server or string with error message
-        const dataResponce = async () => { 
-            await getDataFromServer(input as input);
+        const dataResponce = async (first: input, second?: input) => { 
+            typeof second !== 'undefined'? await getDataFromServer(first, second) : await getDataFromServer(first);
         };
 
         //Saving data which user input
-        let input = Input(progress, false) as input | boolean;
+        let input = Input('first-step') as input | boolean;
 
         //Clearing data in inputs for either choosing different data or staying clear
-        Input(progress, true);
+        Input('clear');
 
         //If the user did not select database input returned a boolean value
         if (input === false) {
@@ -108,21 +101,20 @@ window.addEventListener("DOMContentLoaded", () => {
                 return;
 
             console.log(input);
-            dataResponce();
+            dataResponce(input);
         };
         
         //This menu only shows when user did not select add method.
         const btn_server = document.querySelector('#submit-to-server') as HTMLButtonElement;
         btn_server.addEventListener("click", (event_server) => {
-            progress = 'second-step';
             
             //We cleared all inputs before and need to send whole input type data.
             if (typeof input !== 'boolean')
                 database_temp = input.database_check as string;
-            input = Input(progress, false) as input | boolean;
+            input = Input('second-step') as input | boolean;
             if (typeof input !== 'boolean') {
                 input.database_check = database_temp;
-                dataResponce();
+                input.method_check === 'PUT' ? dataResponce(input, Input('modify') as input) : dataResponce(input);
             };
             event_server.preventDefault();
         });
@@ -136,69 +128,84 @@ window.addEventListener("DOMContentLoaded", () => {
 //'user' - needs to select at least one database and choose if he wants to add data inserted later
 //'server' - only select left methods remove, modify or search
 //'clear_input' - to clear inputss
-function Input(progress: string, clear_input: boolean) {
+function Input(progress: string) {
 
-    if (clear_input === true) {
-        const name = document.querySelector("#first-field") as HTMLInputElement;
-        const surname = document.querySelector("#second-field") as HTMLInputElement;
-        const age = document.querySelector("#third-field") as HTMLInputElement;
-        const subjects = document.querySelector("#fourth-field") as HTMLInputElement;
-        name.innerText = '';
-        surname.innerText = '';
-        age.innerText = '';
-        subjects.innerText = '';
-        return true;
-    }
-
-    if (progress === 'first-step') {
-        let database_check: string = '';
-        const post_method: HTMLButtonElement = document.querySelector('#method-add-button') as HTMLButtonElement;
-        const database: NodeListOf<HTMLInputElement> = document.querySelectorAll('.database') as NodeListOf<HTMLInputElement>;
-        database.forEach(x => {
-            if(x.checked === true)
-            database_check = x.value;
-        });
-        if (database_check === ''){
-            console.warn('Did not select which database use.');
-            return false;
+    switch (progress) {
+        case 'clear': {
+            const name = document.querySelector("#first-field") as HTMLInputElement;
+            const surname = document.querySelector("#second-field") as HTMLInputElement;
+            const age = document.querySelector("#third-field") as HTMLInputElement;
+            const subjects = document.querySelector("#fourth-field") as HTMLInputElement;
+            name.innerText = '';
+            surname.innerText = '';
+            age.innerText = '';
+            subjects.innerText = '';
+            return true;
         };
 
-        const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
-        const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
-        const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
-        const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
-        const method_check: string = 'POST';
+        case 'first-step': {
+            let database_check: string = '';
+            const post_method: HTMLButtonElement = document.querySelector('#method-add-button') as HTMLButtonElement;
+            const database: NodeListOf<HTMLInputElement> = document.querySelectorAll('.database') as NodeListOf<HTMLInputElement>;
+            database.forEach(x => {
+                if(x.checked === true)
+                database_check = x.value;
+            });
+            if (database_check === ''){
+                console.warn('Did not select which database use.');
+                return false;
+            };
 
-        if (post_method.className === 'add-on')
-            return {database_check, name, surname, age, subjects, method_check};
-        else
-            return {database_check, name, surname, age, subjects}
-    };
+            const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
+            const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
+            const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
+            const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
+            const method_check: string = 'POST';
 
-    if (progress === 'secomd-step') {
-        let method_check: string = '';
-        const method: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.method'));
-        method.forEach(x => {
-            if(x.checked === true)
-                method_check = x.value;
-        });
-        if (method_check === ''){
-            console.warn('Did not select which method use.');
+            if (post_method.className === 'add-on')
+                return {database_check, name, surname, age, subjects, method_check};
+            else
+                return {database_check, name, surname, age, subjects}
+        };
+
+        case 'second-step': {
+            let method_check: string = '';
+            const method: NodeListOf<HTMLInputElement> = (<NodeListOf<HTMLInputElement>>document.querySelectorAll('.method'));
+            method.forEach(x => {
+                if(x.checked === true)
+                    method_check = x.value;
+            });
+            if (method_check === ''){
+                console.warn('Did not select which method use.');
+                return false;
+            };
+            const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
+            const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
+            const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
+            const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
+            return {method_check, name, surname, age, subjects};
+        };
+
+        case 'modify': {
+            const name: string = (<HTMLInputElement>document.querySelector("#first-modify-field")).value;
+            const surname: string = (<HTMLInputElement>document.querySelector("#second-modify-field")).value;
+            const age: number = Number((<HTMLInputElement>document.querySelector("#third-modify-field")).value);
+            const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-modify-field")).value];
+            if (subjects.length === 1 && subjects[0] === '')
+                return {name, surname, age};
+            else
+                return {name, surname, age, subjects};
+        };
+
+        default: {
             return false;
         };
-        const name: string = (<HTMLInputElement>document.querySelector("#first-field")).value;
-        const surname: string = (<HTMLInputElement>document.querySelector("#second-field")).value;
-        const age: number = Number((<HTMLInputElement>document.querySelector("#third-field")).value);
-        const subjects: string[] = [(<HTMLInputElement>document.querySelector("#fourth-field")).value];
-        return {method_check, name, surname, age, subjects};
     };
-
-    return false;
 };
 
 //Function sending data to server as query or user data
 //'data_to_send' - only accepts data with type input
-async function getDataFromServer(data_to_send: input) {
+async function getDataFromServer(data_to_send: input, data_to_modify?: input) {
 
     //Function only for 'GET' method
     //'url' - 'GET' method only send data in form of query
@@ -212,10 +219,10 @@ async function getDataFromServer(data_to_send: input) {
         return res;
     };
 
-    //Function for 'POST', 'DELETE', 'PATCH'
+    //Function for 'POST', 'DELETE', 'PPUT'
     //'url' - uses as short url to show which database we want to use
     //In body we pass 'data_to_send' with data inserted by user
-    async function sendToServer(url: string) {
+    async function sendToServer(url: string, data: object) {
         const method_check = data_to_send.method_check;
         delete data_to_send.method_check;
         delete data_to_send.database_check;
@@ -224,7 +231,7 @@ async function getDataFromServer(data_to_send: input) {
             headers: {
                 'Content-type': 'application/json; charset="utf-8"',
                 },
-            body: JSON.stringify(data_to_send)
+            body: JSON.stringify(data),
         });
         return res;
     };
@@ -279,7 +286,7 @@ async function getDataFromServer(data_to_send: input) {
     }
     else {
         url = `${base_url}/${data_to_send.database_check}`;
-        const res = await sendToServer(url);
+        const res = await sendToServer(url, {data_to_send, data_to_modify});
         const return_data: serverReponse = new ServerData(await res.json());
         switch (return_data.code) {
             case 0o0001:
@@ -355,6 +362,7 @@ function displayResult(data: returnedData, id: string, method?: string) {
             const select_ul = document.getElementById(`${id}`) as HTMLUListElement;
             select_ul.insertAdjacentElement('beforeend', li_element);
             li_element.setAttribute('id', `${key}-${id}-li`);
+            li_element.setAttribute('class', key);
             const select_li = document.getElementById(`${key}-${id}-li`) as HTMLLIElement;
             select_li.insertAdjacentElement('beforeend', p_element);
             p_element.setAttribute('id', `${key}-${id}-p`);
@@ -372,14 +380,14 @@ function displayResult(data: returnedData, id: string, method?: string) {
         const id = event.composedPath()[2].id;
         console.log(id);
         const list = document.querySelector(`#${id}`) as HTMLUListElement;
-        const inputs = document.querySelectorAll(`.write`) as NodeListOf<HTMLInputElement>;
+        const inputs = document.querySelectorAll(`#inputs > .write`) as NodeListOf<HTMLInputElement>;
         const li = list.childNodes as NodeListOf<HTMLLIElement>;
-        inputs[0].value = li[0].innerText;
-        inputs[1].value = li[1].innerText;
-        inputs[2].value = li[2].innerText;
-        try {
-            inputs[3].value = li[3].innerText;
-        } finally {};
+        li.forEach(el_li => {
+            inputs.forEach(el_inputs => {
+                if(el_li.className === el_inputs.attributes.getNamedItem('for-attr')!.value)
+                    el_inputs.value = el_li.innerText;
+            });
+        });
 
     };
 

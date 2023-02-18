@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { addNewTeacher, removeTeacher, returnTeacherInfo, searchTeacher } from './teachers.js';
+import { addNewTeacher, modifyTeacher, removeTeacher, returnTeacherInfo, searchTeacher } from './teachers.js';
 
 type returnedData = {
     data: Array<object>,
@@ -19,7 +19,7 @@ server.use(cors({
 
 server.get(`/server_status`, (req, res) => {
     console.log(`${Date()} Incoming traffic from IP: ${req.ip} HOSTNAME: ${req.hostname}`);
-    res.status(200).json({
+    return res.status(200).json({
         msg: 'Server online',
         code: 0o0001
     });
@@ -54,12 +54,12 @@ server.get('/teachers?:id', (req, res) => {
                 data: returnTeacherInfo(el.id)};
         });
     if (return_data.length === 0) 
-        res.status(200).json({
+        return res.status(200).json({
             msg: 'Did not found teacher. Please try again or try other search parameters.',
             code: 0o0013
         })
     else
-        res.status(200).json({
+        return res.status(200).json({
             data: return_array,
             msg: 'Returning data',
             code: 0o0101
@@ -71,7 +71,7 @@ server.post('/:database', (req, res) => {
     let return_data: any;
     let return_array: Array<returnedData> = [];
 
-    const data = req.body;
+    const data = req.body.data_to_send;
     if (!data) {
         return res.status(400).json({
             msg: 'Failed to received',
@@ -109,37 +109,71 @@ server.post('/:database', (req, res) => {
 });
 
 server.delete('/teachers', (req, res) => {
-    let data = req.body || req.body.short_data;
+    const data = req.body.data_to_send;
     if (!data) {
         return res.status(400).json({
             msg: 'Failed to received',
             code: 0o0002
         });
-    };
-    if (data.method_check === 'DELETE'){
+    }
+    else {
         delete data.method_check;
         delete data.database_check;
-        const teacher = searchTeacher(data)
+        const teacher = searchTeacher(data);
         const finish: boolean = removeTeacher(teacher);
         console.log(`Removing teacher finished with status ${finish}`);
-        res.status(200).json({
-            msg: `Data received. Removed teacher ${data.name}, ${data.surname}, ${data.age}, ${data.subject}`,
-            code: 0o0001
+        if (finish === true){
+            return res.status(200).json({
+                msg: `Data received. Removed teacher ${data.name}, ${data.surname}, ${data.age}, ${data.subject}`,
+                code: 0o0001
+            });
+        }
+        else {
+            console.log('Data received but did not specified method.')
+            return res.status(200).json({
+                msg: 'Data received but did not specified method.',
+                code: 0o0012
+            });
+        };
+    };
+});
+
+server.put('/teachers', (req, res) => {
+    const data = req.body.data_to_send;
+    const data_modify = req.body.data_to_modify;
+    if (!data && !data_modify) {
+        return res.status(400).json({
+            msg: 'Failed to received',
+            code: 0o0002
+        });
+    };
+    const teacher = searchTeacher(data);
+    if(teacher.length === 0) {
+        return res.status(200).json({
+            msg: 'Did not found teacher. Please try again or try other search parameters.',
+            code: 0o0013
+        });
+    };
+    if(teacher.length >= 2) {
+        return res.status(200).json({
+            msg: 'Cannot modify teacher. Found more than one match.',
+            code: 0o0014
+        });
+    };
+    const state = modifyTeacher(data_modify, teacher[0].id);
+    if (state === false) {
+        return res.status(200).json({
+            msg: 'Unsuccesfull.',
+            code: 0o0002
         });
     }
     else {
-        console.log('Data received but did not specified method.')
-        res.status(200).json({
-            msg: 'Data received but did not specified method.',
-            code: 0o0012
-        })
-    }
+        return res.status(200).json({
+            msg: 'Succesfull.',
+            code: 0o0002
+        });
+    };
 });
-
-server.patch('/', (req, res) => {
-
-});
-
 
 server.listen(port);
 console.log(`Listening on port ${port}`);

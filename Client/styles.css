@@ -10,6 +10,7 @@
 
 :root {
     --select-radio-true: rgb(77, 216, 50);
+    --select-radio-false: rgb(133, 133, 133);
 }
 
 html {
@@ -50,7 +51,7 @@ body {
     margin: 0.2em;
     border-radius: 2em;
     border: .1em solid transparent;
-    background-color: rgb(133 133 133);
+    background-color: var(--select-radio-false);
     transition: 1s all ease;
 }
 
@@ -98,7 +99,7 @@ input[type="radio"]:checked {
 }
 
 .add-wrapper-off {
-    background-color: rgb(133 133 133);
+    background-color: var(--select-radio-false);
     transition: 1s all ease-in-out;
 }
 
@@ -108,30 +109,39 @@ input[type="radio"]:checked {
     left: -0.1em;
     rotate: 180deg;
     transition: 1s all ease-in-out;
+    border-color: var(--select-radio-false);
 }
 
 .add-on {
     position: relative;
     top: -0.2em;
-    left: 1.8em;
+    left: 2em;
     rotate: 0deg;
     transition: 1s all ease-in-out;
+    border-color: var(--select-radio-true);
 }
 
 #method-add-button-wrapper > button {
     width: 1.8em;
     height: 1.8em;
-    border-radius: 1em;
-    border-color: rgb(133 133 133);
+    border-radius: 1em;;
 }
 
-#inputs {
-    opacity: 0;
-    margin-top: .5em;
-    height: 0;
+.inputs-unselect {
+    position: relative;
+    top: 3em;
+    height: 0em;
+    transition: 1s all ease;
 }
 
-#inputs > label {
+.inputs-select {
+    position: relative;
+    top: 0em;
+    height: 18em;
+    transition: 1s all ease;
+}
+
+#inputs > label, #inputs-modify > label {
     display: block;
     padding-left: .2em;
     margin-top: .5em;
@@ -160,8 +170,18 @@ input[type="radio"]:checked {
     margin: 0 auto;
 }
 
-.modify-unselected {
-    height: 0;
+.modify-unselect {
+    position: relative;
+    top: 3em;
+    height: 0em;
+    transition: 1s all ease;
+}
+
+.modify-select {
+    position: relative;
+    top: 0em;
+    height: 18em;
+    transition: 1s all ease;
 }
 
 #yes-button {
@@ -222,6 +242,6 @@ li::marker {
     width: 14em;
     text-align: center;
     padding: 1em;
-    background-color: rgb(133 133 133);
+    background-color: var(--select-radio-false);
     border-radius: 1em;
 }

@@ -33,5 +33,5 @@ export function searchIfKeyExist(inFile: string, key: string){
 
         default:
             break;
-    }
+    };
 };

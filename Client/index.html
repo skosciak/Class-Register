@@ -32,7 +32,7 @@
                     <button type="button" id="method-add-button" class="add-off"></button>
                 </div>
             </div>
-            <div id="inputs">
+            <div id="inputs" class="inputs-unselect">
                 <h3>Wpisz danę do wyszukania:</h3>
                 <label id="first-field-label" for="first-field"></label>
                 <input type="text" class="input write" id="first-field" name="first-field">
@@ -50,23 +50,23 @@
             <div id="method-wrapper">
                 <div class="input-wrapper">
                     <label for="method-remove">&nbsp&nbspUsuń</label>
-                    <input type="radio" name="method" class="method" id="method-remove" value="DELETE">
+                    <input type="radio" name="method" class="method" id="method-delete" value="DELETE">
                 </div>
                 <div class="input-wrapper">
                     <label for="method-modify">&nbsp&nbspModyfikuj</label>
-                    <input type="radio" name="method" class="method" id="method-modify" value="MODIFY">
+                    <input type="radio" name="method" class="method" id="method-modify" value="PUT">
                 </div>
             </div>
-            <div id="modify-wrapper" class="modify-unselected">
+            <div id="inputs-modify" class="modify-unselect">
                 <h3>Wybierz które dane chcesz zaktualizować</h3>
-                <label id="first-field-label" for="first-field"></label>
-                <input type="text" class="input write" id="first-field" name="first-field">
-                <label id="second-field-label" for="second-field"></label>
-                <input type="text" class="input write" id="second-field" name="second-field">
-                <label id="third-field-label" for="third-field"></label>
-                <input type="number" class="input write" id="third-field" name="third-field">
-                <label id="fourth-field-label" for="fourth-field"></label>
-                <input type="text" class="input write" id="fourth-field" name="fourth-field">
+                <label id="first-field-modify-label" for="first-modify-field"></label>
+                <input type="text" class="input write" id="first-modify-field" name="first-field">
+                <label id="second-field-modify-label" for="second-modify-field"></label>
+                <input type="text" class="input write" id="second-modify-field" name="second-field">
+                <label id="third-field-modify-label" for="third-modify-field"></label>
+                <input type="number" class="input write" id="third-modify-field" name="third-field">
+                <label id="fourth-field-modify-label" for="fourth-modify-field"></label>
+                <input type="text" class="input write" id="fourth-modify-field" name="fourth-field">
             </div>
             <button id="submit-to-server">Finalizuj</button>
         </form>

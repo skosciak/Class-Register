@@ -41,12 +41,28 @@
 		"id_5": {
 			"name": "sebastian",
 			"surname": "kościak",
-			"age": 60
+			"age": 80
+		},
+		"id_8": {
+			"name": "sebastian",
+			"surname": "kościak",
+			"subjects": [
+				"religia"
+			]
+		},
+		"id_9": {
+			"name": "alan",
+			"surname": "cebula",
+			"age": 15,
+			"subjects": [
+				"french",
+				"polish",
+				"math"
+			]
 		},
 		"id_4": {
 			"name": "sebastian",
 			"surname": "kościak",
-			"age": 80,
 			"subjects": [
 				"biologia"
 			]

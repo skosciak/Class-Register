@@ -12,16 +12,19 @@ const base_url = 'http://localhost:5500';
 class ServerData {
     constructor(serverResponse) {
         if (serverResponse.data !== undefined) {
-            this.msg = serverResponse.msg,
-                this.code = Number(serverResponse.code),
-                this.data = serverResponse.data;
+            this.msg = serverResponse.msg;
+            this.code = Number(serverResponse.code);
+            this.data = serverResponse.data;
         }
         else {
-            this.msg = serverResponse.msg,
-                this.code = Number(serverResponse.code);
+            this.msg = serverResponse.msg;
+            this.code = Number(serverResponse.code);
         }
+        ;
     }
+    ;
 }
+;
 window.addEventListener("DOMContentLoaded", () => {
     console.log("DOM Loaded");
     console.log('Checking connection with server...');
@@ -35,16 +38,15 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     //Adding event listener to button with id submit
     btn_user.addEventListener("click", (event_client) => {
-        let progress = 'first-step';
         let database_temp = '';
         //Function returning data from server or string with error message
-        const dataResponce = () => __awaiter(void 0, void 0, void 0, function* () {
-            yield getDataFromServer(input);
+        const dataResponce = (first, second) => __awaiter(void 0, void 0, void 0, function* () {
+            typeof second !== 'undefined' ? yield getDataFromServer(first, second) : yield getDataFromServer(first);
         });
         //Saving data which user input
-        let input = Input(progress, false);
+        let input = Input('first-step');
         //Clearing data in inputs for either choosing different data or staying clear
-        Input(progress, true);
+        Input('clear');
         //If the user did not select database input returned a boolean value
         if (input === false) {
             window.alert('Did not select database.');
@@ -68,20 +70,19 @@ window.addEventListener("DOMContentLoaded", () => {
             if (input_no_data === 0)
                 return;
             console.log(input);
-            dataResponce();
+            dataResponce(input);
         }
         ;
         //This menu only shows when user did not select add method.
         const btn_server = document.querySelector('#submit-to-server');
         btn_server.addEventListener("click", (event_server) => {
-            progress = 'second-step';
             //We cleared all inputs before and need to send whole input type data.
             if (typeof input !== 'boolean')
                 database_temp = input.database_check;
-            input = Input(progress, false);
+            input = Input('second-step');
             if (typeof input !== 'boolean') {
                 input.database_check = database_temp;
-                dataResponce();
+                input.method_check === 'PUT' ? dataResponce(input, Input('modify')) : dataResponce(input);
             }
             ;
             event_server.preventDefault();
@@ -94,67 +95,90 @@ window.addEventListener("DOMContentLoaded", () => {
 //'user' - needs to select at least one database and choose if he wants to add data inserted later
 //'server' - only select left methods remove, modify or search
 //'clear_input' - to clear inputss
-function Input(progress, clear_input) {
-    if (clear_input === true) {
-        const name = document.querySelector("#first-field");
-        const surname = document.querySelector("#second-field");
-        const age = document.querySelector("#third-field");
-        const subjects = document.querySelector("#fourth-field");
-        name.innerText = '';
-        surname.innerText = '';
-        age.innerText = '';
-        subjects.innerText = '';
-        return true;
-    }
-    if (progress === 'first-step') {
-        let database_check = '';
-        const post_method = document.querySelector('#method-add-button');
-        const database = document.querySelectorAll('.database');
-        database.forEach(x => {
-            if (x.checked === true)
-                database_check = x.value;
-        });
-        if (database_check === '') {
-            console.warn('Did not select which database use.');
-            return false;
-        }
-        ;
-        const name = document.querySelector("#first-field").value;
-        const surname = document.querySelector("#second-field").value;
-        const age = Number(document.querySelector("#third-field").value);
-        const subjects = [document.querySelector("#fourth-field").value];
-        const method_check = 'POST';
-        if (post_method.className === 'add-on')
-            return { database_check, name, surname, age, subjects, method_check };
-        else
-            return { database_check, name, surname, age, subjects };
+function Input(progress) {
+    switch (progress) {
+        case 'clear':
+            {
+                const name = document.querySelector("#first-field");
+                const surname = document.querySelector("#second-field");
+                const age = document.querySelector("#third-field");
+                const subjects = document.querySelector("#fourth-field");
+                name.innerText = '';
+                surname.innerText = '';
+                age.innerText = '';
+                subjects.innerText = '';
+                return true;
+            }
+            ;
+        case 'first-step':
+            {
+                let database_check = '';
+                const post_method = document.querySelector('#method-add-button');
+                const database = document.querySelectorAll('.database');
+                database.forEach(x => {
+                    if (x.checked === true)
+                        database_check = x.value;
+                });
+                if (database_check === '') {
+                    console.warn('Did not select which database use.');
+                    return false;
+                }
+                ;
+                const name = document.querySelector("#first-field").value;
+                const surname = document.querySelector("#second-field").value;
+                const age = Number(document.querySelector("#third-field").value);
+                const subjects = [document.querySelector("#fourth-field").value];
+                const method_check = 'POST';
+                if (post_method.className === 'add-on')
+                    return { database_check, name, surname, age, subjects, method_check };
+                else
+                    return { database_check, name, surname, age, subjects };
+            }
+            ;
+        case 'second-step':
+            {
+                let method_check = '';
+                const method = document.querySelectorAll('.method');
+                method.forEach(x => {
+                    if (x.checked === true)
+                        method_check = x.value;
+                });
+                if (method_check === '') {
+                    console.warn('Did not select which method use.');
+                    return false;
+                }
+                ;
+                const name = document.querySelector("#first-field").value;
+                const surname = document.querySelector("#second-field").value;
+                const age = Number(document.querySelector("#third-field").value);
+                const subjects = [document.querySelector("#fourth-field").value];
+                return { method_check, name, surname, age, subjects };
+            }
+            ;
+        case 'modify':
+            {
+                const name = document.querySelector("#first-modify-field").value;
+                const surname = document.querySelector("#second-modify-field").value;
+                const age = Number(document.querySelector("#third-modify-field").value);
+                const subjects = [document.querySelector("#fourth-modify-field").value];
+                if (subjects.length === 1 && subjects[0] === '')
+                    return { name, surname, age };
+                else
+                    return { name, surname, age, subjects };
+            }
+            ;
+        default:
+            {
+                return false;
+            }
+            ;
     }
     ;
-    if (progress === 'secomd-step') {
-        let method_check = '';
-        const method = document.querySelectorAll('.method');
-        method.forEach(x => {
-            if (x.checked === true)
-                method_check = x.value;
-        });
-        if (method_check === '') {
-            console.warn('Did not select which method use.');
-            return false;
-        }
-        ;
-        const name = document.querySelector("#first-field").value;
-        const surname = document.querySelector("#second-field").value;
-        const age = Number(document.querySelector("#third-field").value);
-        const subjects = [document.querySelector("#fourth-field").value];
-        return { method_check, name, surname, age, subjects };
-    }
-    ;
-    return false;
 }
 ;
 //Function sending data to server as query or user data
 //'data_to_send' - only accepts data with type input
-function getDataFromServer(data_to_send) {
+function getDataFromServer(data_to_send, data_to_modify) {
     return __awaiter(this, void 0, void 0, function* () {
         //Function only for 'GET' method
         //'url' - 'GET' method only send data in form of query
@@ -170,10 +194,10 @@ function getDataFromServer(data_to_send) {
             });
         }
         ;
-        //Function for 'POST', 'DELETE', 'PATCH'
+        //Function for 'POST', 'DELETE', 'PPUT'
         //'url' - uses as short url to show which database we want to use
         //In body we pass 'data_to_send' with data inserted by user
-        function sendToServer(url) {
+        function sendToServer(url, data) {
             return __awaiter(this, void 0, void 0, function* () {
                 const method_check = data_to_send.method_check;
                 delete data_to_send.method_check;
@@ -183,7 +207,7 @@ function getDataFromServer(data_to_send) {
                     headers: {
                         'Content-type': 'application/json; charset="utf-8"',
                     },
-                    body: JSON.stringify(data_to_send)
+                    body: JSON.stringify(data),
                 });
                 return res;
             });
@@ -242,7 +266,7 @@ function getDataFromServer(data_to_send) {
         }
         else {
             url = `${base_url}/${data_to_send.database_check}`;
-            const res = yield sendToServer(url);
+            const res = yield sendToServer(url, { data_to_send, data_to_modify });
             const return_data = new ServerData(yield res.json());
             switch (return_data.code) {
                 case 0o0001:
@@ -314,6 +338,7 @@ function displayResult(data, id, method) {
             const select_ul = document.getElementById(`${id}`);
             select_ul.insertAdjacentElement('beforeend', li_element);
             li_element.setAttribute('id', `${key}-${id}-li`);
+            li_element.setAttribute('class', key);
             const select_li = document.getElementById(`${key}-${id}-li`);
             select_li.insertAdjacentElement('beforeend', p_element);
             p_element.setAttribute('id', `${key}-${id}-p`);
@@ -332,16 +357,14 @@ function displayResult(data, id, method) {
         const id = event.composedPath()[2].id;
         console.log(id);
         const list = document.querySelector(`#${id}`);
-        const inputs = document.querySelectorAll(`.write`);
+        const inputs = document.querySelectorAll(`#inputs > .write`);
         const li = list.childNodes;
-        inputs[0].value = li[0].innerText;
-        inputs[1].value = li[1].innerText;
-        inputs[2].value = li[2].innerText;
-        try {
-            inputs[3].value = li[3].innerText;
-        }
-        finally { }
-        ;
+        li.forEach(el_li => {
+            inputs.forEach(el_inputs => {
+                if (el_li.className === el_inputs.attributes.getNamedItem('for-attr').value)
+                    el_inputs.value = el_li.innerText;
+            });
+        });
     }
     ;
     createList(data, id);
