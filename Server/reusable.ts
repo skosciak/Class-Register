@@ -13,7 +13,7 @@ export function openFile(file_name: string, return_value: boolean) {
     };
 };
 
-export function searchIfKeyExist(inFile: string, key: string){
+export function searchIfKeyExist(inFile: string, key: string | number){
     const read_file = openFile(inFile, true);
     switch (Object.keys(read_file)[0]) {
         case 'classroom':

@@ -9,6 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const base_url = 'http://localhost:5500';
+;
+;
+;
+;
 class ServerData {
     constructor(serverResponse) {
         if (serverResponse.data !== undefined) {
@@ -25,7 +29,136 @@ class ServerData {
     ;
 }
 ;
-window.addEventListener("DOMContentLoaded", () => {
+class InputClass {
+    constructor() {
+        this.checkDatabase();
+        const mandatory_button = document.querySelector('#mandatory-button');
+        switch (this.database) {
+            case 'teachers':
+                {
+                    this.name = document.querySelector("#first-field").value;
+                    this.surname = document.querySelector("#second-field").value;
+                    this.age = Number(document.querySelector("#third-field").value);
+                    this.subject = document.querySelector("#fourth-field").value;
+                    this.type = 'input_teachers';
+                    this.deleteKeys();
+                    break;
+                }
+                ;
+            case 'classrooms':
+                {
+                    this.classroom = Number(document.querySelector("#first-field").value);
+                    this.max_people = Number(document.querySelector("#second-field").value);
+                    this.main_subject = document.querySelector("#third-field").value;
+                    this.type = 'input_classrooms';
+                    this.deleteKeys();
+                    break;
+                }
+                ;
+            case 'subjects':
+                {
+                    this.subject = document.querySelector("#first-field").value;
+                    this.classroom = Number(document.querySelector("#first-field").value);
+                    this.lesson_hour = Number(document.querySelector("#second-field").value);
+                    this.type = 'input_subjects';
+                    if (mandatory_button.className === 'on')
+                        this.mandatory = true;
+                    else
+                        this.mandatory = false;
+                    this.deleteKeys();
+                    break;
+                }
+                ;
+        }
+        ;
+    }
+    ;
+    checkDatabase() {
+        const database = document.querySelectorAll('.database');
+        database.forEach(x => {
+            if (x.checked === true)
+                this.database = x.value;
+        });
+    }
+    ;
+    checkMethod() {
+        const post_method = document.querySelector('#method-add-button');
+        if (post_method.className === 'on')
+            this.method = 'POST';
+        else {
+            const method = document.querySelectorAll('.method');
+            method.forEach(x => {
+                if (x.checked === true)
+                    this.method = x.value;
+            });
+        }
+        ;
+    }
+    ;
+    deleteKeys() {
+        if (this.name === undefined || this.name === '')
+            delete this.name;
+        if (this.surname === undefined || this.surname === '')
+            delete this.surname;
+        if (this.age === undefined || Number.isNaN(this.age) || this.age === 0)
+            delete this.age;
+        if (this.subject === undefined || this.subject === '')
+            delete this.subject;
+        if (this.classroom === undefined || Number.isNaN(this.classroom))
+            delete this.classroom;
+        if (this.max_people === undefined || Number.isNaN(this.max_people))
+            delete this.max_people;
+        if (this.main_subject === undefined || this.main_subject === '')
+            delete this.main_subject;
+        if (this.lesson_hour === undefined || Number.isNaN(this.lesson_hour))
+            delete this.lesson_hour;
+        if (this.mandatory === undefined)
+            delete this.mandatory;
+    }
+    ;
+    modifyMethod() {
+        switch (this.database) {
+            case 'teachers':
+                {
+                    this.name = document.querySelector("#first-modify-field").value;
+                    this.surname = document.querySelector("#second-modify-field").value;
+                    this.age = Number(document.querySelector("#third-modify-field").value);
+                    this.subject = document.querySelector("#fourth-modify-field").value;
+                    break;
+                }
+                ;
+            case 'classrooms':
+                {
+                    this.classroom = Number(document.querySelector("#first-modify-field").value);
+                    this.max_people = Number(document.querySelector("#second-modify-field").value);
+                    this.main_subject = document.querySelector("#third-modify-field").value;
+                    break;
+                }
+                ;
+            case 'subjects':
+                {
+                    const mandatory_button_modify = document.querySelector('#mandatory-button-modify');
+                    this.subject = document.querySelector("#first-modify-field").value;
+                    this.classroom = Number(document.querySelector("#second-modify-field").value);
+                    this.lesson_hour = Number(document.querySelector("#third-modify-field").value);
+                    if (mandatory_button_modify.className === 'on')
+                        this.mandatory = true;
+                    else
+                        this.mandatory = false;
+                    this.deleteKeys();
+                    break;
+                    break;
+                }
+                ;
+        }
+        ;
+    }
+    ;
+}
+;
+const database = document.querySelectorAll('.input-wrapper');
+database.forEach(el => el.addEventListener('click', () => detectStart()));
+function detectStart() {
     console.log("DOM Loaded");
     console.log('Checking connection with server...');
     const btn_user = document.querySelector('#submit');
@@ -39,36 +172,32 @@ window.addEventListener("DOMContentLoaded", () => {
     //Adding event listener to button with id submit
     btn_user.addEventListener("click", (event_client) => {
         let database_temp = '';
+        const inputs_validation = document.querySelectorAll('#inputs .write');
+        let validate;
         //Function returning data from server or string with error message
-        const dataResponce = (first, second) => __awaiter(void 0, void 0, void 0, function* () {
+        const dataResponce = (first, second) => __awaiter(this, void 0, void 0, function* () {
             typeof second !== 'undefined' ? yield getDataFromServer(first, second) : yield getDataFromServer(first);
         });
+        //Checking if in validation every input is properly written
+        inputs_validation.forEach(el => {
+            if (!(el.placeholder) === false) {
+                validate = false;
+            }
+        });
+        if (validate === false)
+            return;
         //Saving data which user input
-        let input = Input('first-step');
+        let input = new InputClass;
+        input.checkMethod();
         //Clearing data in inputs for either choosing different data or staying clear
-        Input('clear');
-        //If the user did not select database input returned a boolean value
-        if (input === false) {
+        inputClear();
+        //If the user did not select the database we return an alert message
+        if (input.database === undefined) {
             window.alert('Did not select database.');
             event_client.preventDefault();
             return;
         }
-        ;
-        //If type is not boolean function start working with data
-        if (typeof input !== 'boolean') {
-            let input_no_data = 4;
-            if (input.database_check === 'classroom')
-                input_no_data = 3;
-            if (input.age === 0)
-                input_no_data--;
-            if (input.name === '')
-                input_no_data--;
-            if (input.subjects.length === 1 && input.subjects[0] === '')
-                input_no_data--;
-            if (input.surname === '')
-                input_no_data--;
-            if (input_no_data === 0)
-                return;
+        else {
             console.log(input);
             dataResponce(input);
         }
@@ -78,108 +207,42 @@ window.addEventListener("DOMContentLoaded", () => {
         btn_server.addEventListener("click", (event_server) => {
             //We cleared all inputs before and need to send whole input type data.
             if (typeof input !== 'boolean')
-                database_temp = input.database_check;
-            input = Input('second-step');
+                database_temp = input.database;
+            input = new InputClass;
             if (typeof input !== 'boolean') {
-                input.database_check = database_temp;
-                input.method_check === 'PUT' ? dataResponce(input, Input('modify')) : dataResponce(input);
+                input.database = database_temp;
+                input.checkMethod();
+                const input_modify = new InputClass;
+                input_modify.modifyMethod();
+                input_modify.deleteKeys();
+                inputClear();
+                input.method === 'PUT' ? dataResponce(input, input_modify) : dataResponce(input);
             }
             ;
             event_server.preventDefault();
         });
         event_client.preventDefault();
     });
-});
-//Function save user input and have 3 options.
-//'progress' which can be 'user' or 'server'
-//'user' - needs to select at least one database and choose if he wants to add data inserted later
-//'server' - only select left methods remove, modify or search
-//'clear_input' - to clear inputss
-function Input(progress) {
-    switch (progress) {
-        case 'clear':
-            {
-                const name = document.querySelector("#first-field");
-                const surname = document.querySelector("#second-field");
-                const age = document.querySelector("#third-field");
-                const subjects = document.querySelector("#fourth-field");
-                name.innerText = '';
-                surname.innerText = '';
-                age.innerText = '';
-                subjects.innerText = '';
-                return true;
-            }
-            ;
-        case 'first-step':
-            {
-                let database_check = '';
-                const post_method = document.querySelector('#method-add-button');
-                const database = document.querySelectorAll('.database');
-                database.forEach(x => {
-                    if (x.checked === true)
-                        database_check = x.value;
-                });
-                if (database_check === '') {
-                    console.warn('Did not select which database use.');
-                    return false;
-                }
-                ;
-                const name = document.querySelector("#first-field").value;
-                const surname = document.querySelector("#second-field").value;
-                const age = Number(document.querySelector("#third-field").value);
-                const subjects = [document.querySelector("#fourth-field").value];
-                const method_check = 'POST';
-                if (post_method.className === 'add-on')
-                    return { database_check, name, surname, age, subjects, method_check };
-                else
-                    return { database_check, name, surname, age, subjects };
-            }
-            ;
-        case 'second-step':
-            {
-                let method_check = '';
-                const method = document.querySelectorAll('.method');
-                method.forEach(x => {
-                    if (x.checked === true)
-                        method_check = x.value;
-                });
-                if (method_check === '') {
-                    console.warn('Did not select which method use.');
-                    return false;
-                }
-                ;
-                const name = document.querySelector("#first-field").value;
-                const surname = document.querySelector("#second-field").value;
-                const age = Number(document.querySelector("#third-field").value);
-                const subjects = [document.querySelector("#fourth-field").value];
-                return { method_check, name, surname, age, subjects };
-            }
-            ;
-        case 'modify':
-            {
-                const name = document.querySelector("#first-modify-field").value;
-                const surname = document.querySelector("#second-modify-field").value;
-                const age = Number(document.querySelector("#third-modify-field").value);
-                const subjects = [document.querySelector("#fourth-modify-field").value];
-                if (subjects.length === 1 && subjects[0] === '')
-                    return { name, surname, age };
-                else
-                    return { name, surname, age, subjects };
-            }
-            ;
-        default:
-            {
-                return false;
-            }
-            ;
-    }
-    ;
+}
+//Function clear user inputs
+function inputClear() {
+    const name = document.querySelector("#first-field");
+    const surname = document.querySelector("#second-field");
+    const age = document.querySelector("#third-field");
+    const subjects = document.querySelector("#fourth-field");
+    name.value = '';
+    surname.value = '';
+    age.value = '';
+    subjects.value = '';
+    return true;
 }
 ;
 //Function sending data to server as query or user data
-//'data_to_send' - only accepts data with type input
+//'data_to_send' - only accepts data with type InputClass
+//'data_to_modify' - only exist when we choose 'PUT' method with the type of InputClass
 function getDataFromServer(data_to_send, data_to_modify) {
     return __awaiter(this, void 0, void 0, function* () {
+        delete data_to_send.type;
         //Function only for 'GET' method
         //'url' - 'GET' method only send data in form of query
         function sendToServerGet(url) {
@@ -194,14 +257,14 @@ function getDataFromServer(data_to_send, data_to_modify) {
             });
         }
         ;
-        //Function for 'POST', 'DELETE', 'PPUT'
+        //Function for 'POST', 'DELETE', 'PUT'
         //'url' - uses as short url to show which database we want to use
         //In body we pass 'data_to_send' with data inserted by user
         function sendToServer(url, data) {
             return __awaiter(this, void 0, void 0, function* () {
-                const method_check = data_to_send.method_check;
-                delete data_to_send.method_check;
-                delete data_to_send.database_check;
+                const method_check = data_to_send.method;
+                delete data_to_send.method;
+                delete data_to_send.database;
                 const res = yield fetch(url, {
                     method: method_check,
                     headers: {
@@ -215,14 +278,13 @@ function getDataFromServer(data_to_send, data_to_modify) {
         ;
         //Function delete unused keys.
         function deleteKeys() {
-            var _a;
             for (const key in data_to_send) {
                 if (data_to_send[key] === '' || undefined || null)
                     delete data_to_send[key];
                 if (typeof data_to_send[key] === 'number' && data_to_send[key] === 0)
                     delete data_to_send[key];
-                if (key === 'subjects') {
-                    if (((_a = data_to_send.subjects) === null || _a === void 0 ? void 0 : _a.length) === 1 && data_to_send.subjects[0].length === 0)
+                if (key === 'subject') {
+                    if (data_to_send.subject === undefined && !(data_to_send.type === 'input_classrooms'))
                         delete data_to_send[key];
                 }
                 ;
@@ -234,7 +296,7 @@ function getDataFromServer(data_to_send, data_to_modify) {
         function createQuery() {
             let query_URI = '';
             const query_data = Object.assign({}, data_to_send);
-            delete query_data.database_check;
+            delete query_data.database;
             for (const key in query_data) {
                 if (query_URI === '')
                     query_URI = `${key}=${query_data[key]}`;
@@ -250,8 +312,8 @@ function getDataFromServer(data_to_send, data_to_modify) {
         //If 'method_check' is not present function first check if data is not present in databases
         //If it returns data function will display it for easier use.
         //If 'method_check' is present it means that we want to do a specific task to proceed
-        if (data_to_send.method_check === undefined) {
-            url = `${base_url}/${data_to_send.database_check}?${createQuery()}`;
+        if (data_to_send.method === undefined) {
+            url = `${base_url}/${data_to_send.database}?${createQuery()}`;
             const res = yield sendToServerGet(url);
             const return_data = new ServerData(yield res.json());
             if (return_data.code === 0o0013) {
@@ -265,7 +327,7 @@ function getDataFromServer(data_to_send, data_to_modify) {
             return return_data;
         }
         else {
-            url = `${base_url}/${data_to_send.database_check}`;
+            url = `${base_url}/${data_to_send.database}`;
             const res = yield sendToServer(url, { data_to_send, data_to_modify });
             const return_data = new ServerData(yield res.json());
             switch (return_data.code) {
@@ -347,6 +409,7 @@ function displayResult(data, id, method) {
         }
         ;
         list.addEventListener('click', (event) => {
+            inputClear();
             addFromListToInputs(event);
             list.classList.toggle('search-result-green');
         });
@@ -354,14 +417,15 @@ function displayResult(data, id, method) {
     ;
     //Function inserts data from lists to hidden inputs which we can later use
     function addFromListToInputs(event) {
-        const id = event.composedPath()[2].id;
+        const id = event.composedPath()[2].id === '' ? event.composedPath()[0].id : event.composedPath()[2].id;
         console.log(id);
         const list = document.querySelector(`#${id}`);
         const inputs = document.querySelectorAll(`#inputs > .write`);
         const li = list.childNodes;
         li.forEach(el_li => {
             inputs.forEach(el_inputs => {
-                if (el_li.className === el_inputs.attributes.getNamedItem('for-attr').value)
+                var _a;
+                if (el_li.className === ((_a = el_inputs.attributes.getNamedItem('for-attr')) === null || _a === void 0 ? void 0 : _a.value))
                     el_inputs.value = el_li.innerText;
             });
         });

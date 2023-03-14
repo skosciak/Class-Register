@@ -1,10 +1,11 @@
 "use strict";
-window.addEventListener('DOMContentLoaded', () => {
+const input_validation = document.querySelectorAll('.input-wrapper');
+input_validation.forEach(el => el.addEventListener('click', () => {
     const button_database = document.querySelectorAll('.database');
     button_database.forEach(button => {
         button.addEventListener('click', (event) => validateInputAfterSubmit(event));
     });
-});
+}));
 function validateInputAfterSubmit(e) {
     function setErrorMsg(el) {
         el.setAttribute('style', 'border-color: rgb(253 15 15)');
@@ -13,11 +14,10 @@ function validateInputAfterSubmit(e) {
         return true;
     }
     ;
-    function clearAll() {
-        first_input.value = '';
-        second_input.value = '';
-        third_input.value = '';
-        fourth_input.value = '';
+    function clearErrorMsg(el) {
+        el.removeAttribute('style');
+        el.removeAttribute('placeholder');
+        return true;
     }
     const first_input = document.querySelector('#first-field');
     const second_input = document.querySelector('#second-field');
@@ -29,75 +29,86 @@ function validateInputAfterSubmit(e) {
         switch (e.target.id) {
             case 'database-teachers':
                 if (!first_input.value.match(letters) && !(first_input.value === '')) {
-                    clearAll();
+                    first_input.value = '';
                     setErrorMsg(first_input);
                     button_submit_event.preventDefault();
                 }
-                ;
+                else
+                    clearErrorMsg(first_input);
                 if (!second_input.value.match(letters) && !(second_input.value === '')) {
-                    clearAll();
+                    second_input.value = '';
                     setErrorMsg(second_input);
                     button_submit_event.preventDefault();
                 }
-                ;
-                if (!(typeof Number(third_input) === 'number') && !(third_input.value === '')) {
-                    clearAll();
+                else
+                    clearErrorMsg(second_input);
+                if (!(typeof Number(third_input.value) === 'number') && !(third_input.value === '') && !(third_input.type === 'number')) {
+                    third_input.value = '';
                     setErrorMsg(third_input);
                     button_submit_event.preventDefault();
                 }
-                ;
+                else
+                    clearErrorMsg(third_input);
                 if (!fourth_input.value.match(letters) && !(fourth_input.value === '')) {
-                    clearAll();
+                    fourth_input.value = '';
                     setErrorMsg(fourth_input);
                     button_submit_event.preventDefault();
                 }
-                ;
+                else
+                    clearErrorMsg(fourth_input);
                 break;
             case 'database-classroom':
-                if (!(typeof first_input === 'number') && !(first_input.value === '')) {
-                    clearAll();
+                if (!(first_input.type === 'number') && !(first_input.value === '') && !(typeof Number(first_input.value) === 'number')) {
+                    first_input.value = '';
                     setErrorMsg(first_input);
                     button_submit_event.preventDefault();
                 }
-                ;
-                if (!(typeof second_input === 'number') && !(second_input.value === '')) {
-                    clearAll();
+                else
+                    clearErrorMsg(first_input);
+                if (!(second_input.type === 'number') && !(second_input.value === '') && !(typeof Number(second_input.value) === 'number')) {
+                    second_input.value = '';
                     setErrorMsg(second_input);
                     button_submit_event.preventDefault();
                 }
-                ;
-                if (third_input.value.match(letters) && !(third_input.value === '')) {
-                    clearAll();
+                else
+                    clearErrorMsg(second_input);
+                if (!third_input.value.match(letters) && !(third_input.value === '')) {
+                    third_input.value = '';
                     setErrorMsg(third_input);
                     button_submit_event.preventDefault();
                 }
-                ;
+                else
+                    clearErrorMsg(third_input);
                 break;
             case 'database-subjects':
                 if (!first_input.value.match(letters) && !(first_input.value === '')) {
-                    clearAll();
+                    first_input.value = '';
                     setErrorMsg(first_input);
                     button_submit_event.preventDefault();
                 }
-                ;
-                if (!(typeof second_input === 'number') && !(second_input.value === '')) {
-                    clearAll();
+                else
+                    clearErrorMsg(first_input);
+                if (!(second_input.type === 'number') && !(second_input.value === '') && !(typeof Number(second_input.value) === 'number')) {
+                    second_input.value = '';
                     setErrorMsg(second_input);
                     button_submit_event.preventDefault();
                 }
-                ;
-                if (!(typeof third_input === 'number') && !(third_input.value === '')) {
-                    clearAll();
+                else
+                    clearErrorMsg(second_input);
+                if (!(third_input.type === 'number') && !(third_input.value === '') && !(typeof Number(third_input.value) === 'number')) {
+                    third_input.value = '';
                     setErrorMsg(third_input);
                     button_submit_event.preventDefault();
                 }
-                ;
+                else
+                    clearErrorMsg(third_input);
                 if (!fourth_input.value.match(letters) && !(fourth_input.value === '')) {
-                    clearAll();
+                    fourth_input.value = '';
                     setErrorMsg(fourth_input);
                     button_submit_event.preventDefault();
                 }
-                ;
+                else
+                    clearErrorMsg(fourth_input);
                 break;
             default:
                 break;

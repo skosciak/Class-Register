@@ -13,7 +13,7 @@ class Teacher {
             delete this.name;
         if (this.surname === undefined || this.surname === '')
             delete this.surname;
-        if (this.age === undefined || null)
+        if (this.age === undefined)
             delete this.age;
         if (this.subjects === undefined || (this.subjects.length === 1 && this.subjects[0] === ''))
             delete this.subjects;

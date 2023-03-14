@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang = 'en'>
+<html lang = "en">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="input-wrapper">
                     <label for="database-classroom">&nbsp&nbspKlasy</label>
-                    <input type="radio" name="database" class="database first-step" id="database-classroom" value="classroom">
+                    <input type="radio" name="database" class="database first-step" id="database-classroom" value="classrooms">
                 </div>
                 <div class="input-wrapper">
                     <label for="database-subjects">&nbsp&nbspPrzedmioty</label>
@@ -28,21 +28,13 @@
             </div>
             <h3>Czy chcesz dodać dane które zaraz wpiszesz?</h3>
             <div id="method-add-wrapper">
-                <div id="method-add-button-wrapper" class="add-wrapper-off">
-                    <button type="button" id="method-add-button" class="add-off"></button>
+                <p>Nie</p>
+                <div id="method-add-button-wrapper" class="wrapper-off">
+                    <button type="button" id="method-add-button" class="off"></button>
                 </div>
+                <p>Tak</p>
             </div>
             <div id="inputs" class="inputs-unselect">
-                <h3>Wpisz danę do wyszukania:</h3>
-                <label id="first-field-label" for="first-field"></label>
-                <input type="text" class="input write" id="first-field" name="first-field">
-                <label id="second-field-label" for="second-field"></label>
-                <input type="text" class="input write" id="second-field" name="second-field">
-                <label id="third-field-label" for="third-field"></label>
-                <input type="number" class="input write" id="third-field" name="third-field">
-                <label id="fourth-field-label" for="fourth-field"></label>
-                <input type="text" class="input write" id="fourth-field" name="fourth-field">
-                <button id="submit">Szukaj</button>
             </div>
         </form>
         <form id="second-step" style="display: none">
@@ -67,6 +59,13 @@
                 <input type="number" class="input write" id="third-modify-field" name="third-field">
                 <label id="fourth-field-modify-label" for="fourth-modify-field"></label>
                 <input type="text" class="input write" id="fourth-modify-field" name="fourth-field">
+                <div id="mandatory-wrapper-modify" class="hidden">
+                    <p>Nie</p>
+                    <div id = "mandatory-button-wrapper-modify" class="wrapper-off">
+                        <button type="button" id="mandatory-button-modify" class="off"></button>
+                    </div>
+                    <p>Tak</p>
+                </div>
             </div>
             <button id="submit-to-server">Finalizuj</button>
         </form>
@@ -79,8 +78,8 @@
         </form>
         <div id="display-status">
         </div>
-    <script type = 'module' src='scripts/client.js'></script>
-    <script type = 'module' src='scripts/validation.js'></script>
-    <script type = 'module' src='scripts/styling.js'></script>
+    <script type = "module" src="scripts/client.js"></script>
+    <script type = "module" src="scripts/validation.js"></script>
+    <script type = "module" src="scripts/styling.js"></script>
     </body>
 </html>

@@ -1,31 +1,26 @@
 {
 	"classroom": {
+		"1": {
+			"main_subject": "sala gimnastyczna"
+		},
+		"2": {
+			"main_subject": "sala gimnastyczna"
+		},
 		"158": {
 			"max_people": 32,
-			"main_subjects": [
-				"polish"
-			]
+			"main_subject": "polish"
 		},
 		"202": {
-			"main_subjects": [
-				"english",
-				"polish"
-			],
+			"main_subject": "english",
 			"max_people": 48
 		},
 		"208": {
 			"max_people": 48,
-			"main_subjects": [
-				"polish",
-				"english",
-                "spanish"
-			]
+			"main_subject": "spanish"
 		},
-		"404": {
+		"405": {
 			"max_people": 48,
-			"main_subjects": [
-				"english"
-			]
+			"main_subject": "math"
 		}
 	}
 }
