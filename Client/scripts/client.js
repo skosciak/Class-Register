@@ -39,7 +39,7 @@ class InputClass {
                     this.name = document.querySelector("#first-field").value;
                     this.surname = document.querySelector("#second-field").value;
                     this.age = Number(document.querySelector("#third-field").value);
-                    this.subject = document.querySelector("#fourth-field").value;
+                    this.subject = document.querySelector("#fourth-field").value === '' ? '' : `[${document.querySelector("#fourth-field").value}]`;
                     this.type = 'input_teachers';
                     this.deleteKeys();
                     break;
@@ -146,7 +146,6 @@ class InputClass {
                     else
                         this.mandatory = false;
                     this.deleteKeys();
-                    break;
                     break;
                 }
                 ;
@@ -437,6 +436,7 @@ function displayResult(data, id, method) {
 function displayMessage(msg) {
     const p_element = document.createElement('p');
     const select_div = document.querySelector('#display-status');
+    select_div.innerHTML = '';
     select_div.insertAdjacentElement('beforeend', p_element);
     p_element.textContent = msg;
 }

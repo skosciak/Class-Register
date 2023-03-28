@@ -1,12 +1,14 @@
 {
-    "school_subjects": {
-        "english": {
-            "class": "classroom 202",
+    "subjects": {
+        "id_1": {
+            "lesson": "english",
+            "class": 202,
             "lesson_hours": 22,
             "mandatory": true
         },
-        "swedish": {
-            "class": "classroom 158",
+        "id_2": {
+            "lesson": "swedish",
+            "class": 158,
             "lesson_hours": 45,
             "mandatory": true
         }

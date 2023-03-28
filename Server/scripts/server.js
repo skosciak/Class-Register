@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { addNewTeacher, modifyTeacher, removeTeacher, returnTeacherInfo, searchTeacher } from './teachers.js';
-import { addClassroom, removeClassroom, searchClassroom } from './classroom.js';
+import { addNewClassroom, modifyClassroom, removeClassroom, searchClassroom } from './classroom.js';
 const server = express();
 const port = 5500;
 server.use(express.static('public'));
@@ -19,8 +19,10 @@ server.get(`/server_status`, (req, res) => {
 });
 server.get('/teachers?:id', (req, res) => {
     let return_data;
-    let return_array = [];
+    let return_array_perfect = [];
+    let return_array_imperfect = [];
     const query = req.query;
+    const search_type = query.search_type;
     if (!query) {
         return res.status(400).json({
             msg: 'failed to received',
@@ -32,59 +34,40 @@ server.get('/teachers?:id', (req, res) => {
         return_data = searchTeacher(query);
     else
         return_data = returnTeacherInfo(`${query}`);
-    if (Array.isArray(return_data))
-        return_data.forEach(el => {
-            return_array[return_array.length] = {
+    if (Array.isArray(return_data.imperfect) || Array.isArray(return_data.perfect)) {
+        return_data.imperfect.forEach(el => {
+            return_array_perfect[return_array_perfect.length] = {
                 id: el.id,
                 data: returnTeacherInfo(el.id)
             };
         });
-    if (return_data.length === 0)
+        return_data.perfect.forEach(el => {
+            return_array_imperfect[return_array_imperfect.length] = {
+                id: el.id,
+                data: returnTeacherInfo(el.id)
+            };
+        });
+    }
+    ;
+    if (return_data.perfect.length === 0 && return_data.imperfect.length === 0)
         return res.status(200).json({
             msg: 'Did not found teacher. Please try again or try other search parameters.',
             code: 0o0013
         });
+    else if (search_type === 'perfect')
+        return res.status(200).json({
+            data: return_array_perfect,
+            msg: 'Returning data',
+            code: 0o0101
+        });
     else
         return res.status(200).json({
-            data: return_array,
+            data: return_array_imperfect,
             msg: 'Returning data',
             code: 0o0101
         });
 });
-server.get('/classrooms?:id', (req, res) => {
-    const query = req.query;
-    if (!query) {
-        return res.status(400).json({
-            msg: 'Failed to received',
-            code: 0o0002
-        });
-    }
-    ;
-    if (query) {
-        const classrooms = searchClassroom(query);
-        if (classrooms.length !== 0) {
-            return res.status(200).json({
-                data: classrooms,
-                msg: 'Returning data.',
-                code: 0o1001
-            });
-        }
-        else {
-            return res.status(200).json({
-                msg: 'Data received. Did not found classroom with mathing result.',
-                code: 0o0021
-            });
-        }
-    }
-    ;
-    return res.status(200).json({
-        msg: 'Succesfull, but nothing happens.',
-        code: 0o0003
-    });
-});
 server.post('/teachers', (req, res) => {
-    let return_data;
-    let return_array = [];
     const data = req.body.data_to_send;
     if (!data) {
         return res.status(400).json({
@@ -101,35 +84,193 @@ server.post('/teachers', (req, res) => {
         });
     }
     ;
-    return_data = searchTeacher(data);
-    if (return_data.length !== 0) {
-        return_data.forEach((el) => {
-            return_array[return_array.length] = {
-                id: el.id,
-                data: returnTeacherInfo(el.id)
-            };
-        });
+    const return_data = searchTeacher(data);
+    if (return_data.perfect.length === 0) {
+        if (return_data.imperfect.length === 0) {
+            const finish = addNewTeacher(data);
+            if (finish.status === true) {
+                console.log(`Added new teacher with id ${finish.id}`);
+                return res.status(200).json({
+                    msg: `Data received. Added new teacher with id ${finish.id}`,
+                    code: 0o0001
+                });
+            }
+            else {
+                console.log(`Something went wrong!`);
+                return res.status(200).json({
+                    msg: `Data received. But something went wrong. Cannot add teacher`,
+                    code: 0o0002
+                });
+            }
+        }
+        else {
+            const { name, surname } = data;
+            let match = 0;
+            return_data.imperfect.forEach(el => {
+                el.data['name'] === name ? match++ : '';
+                el.data['surname'] === surname ? match++ : '';
+                if (match === 2) {
+                    return res.status(200).json({
+                        msg: `Data received. This teacher already exist!`,
+                        code: 0o0002
+                    });
+                }
+            });
+            const finish = addNewTeacher(data);
+            if (finish.status === true) {
+                console.log(`Added new teacher with id ${finish.id}`);
+                return res.status(200).json({
+                    msg: `Data received. Added new teacher with id ${finish.id}`,
+                    code: 0o0001
+                });
+            }
+            else {
+                console.log(`Something went wrong!`);
+                return res.status(200).json({
+                    msg: `Data received. But something went wrong. Cannot add teacher`,
+                    code: 0o0002
+                });
+            }
+        }
+    }
+    else {
         return res.status(200).json({
-            data: return_array,
-            msg: `Found teacher with same or similar parameters.`,
-            code: 0o0101
+            msg: `Data received. This teacher already exist!`,
+            code: 0o0002
         });
     }
     ;
-    const add_result = addNewTeacher(data);
-    if (add_result.status === true) {
-        console.log(`Added new teacher`);
-        return res.status(200).json({
-            msg: `Data received. Added new teacher with id ${add_result.id}`,
-            code: 0o0001
+});
+server.delete('/teachers', (req, res) => {
+    const data = req.body.data_to_send;
+    if (!data) {
+        return res.status(400).json({
+            msg: 'Failed to received',
+            code: 0o0002
         });
+    }
+    ;
+    const teacher = searchTeacher(data);
+    if (teacher.perfect.length === 0) {
+        console.log('Data received but did not found teacher.');
+        return res.status(200).json({
+            msg: 'Data received but did not found teacher.',
+            code: 0o0013
+        });
+    }
+    else if (teacher.perfect.length === 1) {
+        const finish = removeTeacher(teacher.perfect[0]);
+        console.log(`Removing teacher finished with status ${finish.status}`);
+        if (finish.status === true) {
+            const { name, surname, age, subject } = data;
+            return res.status(200).json({
+                msg: `Data received. Removed teacher ${name === undefined ? '' : name}, ${surname === undefined ? '' : surname}, ${age === undefined ? '' : age}, ${subject === undefined ? '' : subject}`,
+                code: 0o0001
+            });
+        }
+        else {
+            console.log('Data received but something went wrong!.');
+            return res.status(200).json({
+                msg: 'Data received but something went wrong!',
+                code: 0o0002
+            });
+        }
+        ;
+    }
+    else if (teacher.perfect.length > 1) {
+        console.log('Multiple teachers with provided data found.');
+        return res.status(200).json({
+            msg: 'Multiple teachers with provided data found.',
+            code: 0o0014
+        });
+    }
+    ;
+});
+server.put('/teachers', (req, res) => {
+    const data = req.body.data_to_send;
+    const data_modify = req.body.data_to_modify;
+    if (!data || !data_modify) {
+        return res.status(400).json({
+            msg: 'Failed to received',
+            code: 0o0002
+        });
+    }
+    ;
+    const teacher = searchTeacher(data);
+    if (teacher.perfect.length === 0) {
+        return res.status(200).json({
+            msg: 'Did not found teacher. Please try again or try other search parameters.',
+            code: 0o0013
+        });
+    }
+    ;
+    if (teacher.perfect.length >= 2) {
+        return res.status(200).json({
+            msg: 'Cannot modify teacher. Found more than one match.',
+            code: 0o0014
+        });
+    }
+    ;
+    const finish = modifyTeacher(data_modify, teacher.perfect[0].id);
+    if (finish.status === false) {
+        return res.status(200).json({
+            msg: 'Unsuccesfull.',
+            code: 0o0002
+        });
+    }
+    else {
+        return res.status(200).json({
+            msg: 'Succesfull.',
+            code: 0o0002
+        });
+    }
+    ;
+});
+server.get('/classrooms?:id', (req, res) => {
+    const query = req.query;
+    const search_type = query.search_type;
+    if (!query) {
+        return res.status(400).json({
+            msg: 'Failed to received',
+            code: 0o0002
+        });
+    }
+    ;
+    const classrooms = searchClassroom(query);
+    if (search_type === 'perfect') {
+        if (classrooms.perfect.length !== 0) {
+            return res.status(200).json({
+                data: classrooms.perfect,
+                msg: 'Returning data.',
+                code: 0o1001
+            });
+        }
+        else {
+            return res.status(200).json({
+                msg: 'Data received. Did not found classroom with mathing result.',
+                code: 0o0021
+            });
+        }
+    }
+    else {
+        if (classrooms.imperfect.length !== 0) {
+            return res.status(200).json({
+                data: classrooms.imperfect,
+                msg: 'Returning data.',
+                code: 0o1001
+            });
+        }
+        else {
+            return res.status(200).json({
+                msg: 'Data received. Did not found classroom with mathing result.',
+                code: 0o0021
+            });
+        }
     }
     ;
 });
 server.post('/classrooms', (req, res) => {
     const data = req.body.data_to_send;
-    let return_data;
-    let status;
     if (!data) {
         return res.status(400).json({
             msg: 'Failed to received',
@@ -145,72 +286,60 @@ server.post('/classrooms', (req, res) => {
         });
     }
     ;
-    return_data = searchClassroom(data);
-    switch (return_data.length) {
-        case 0:
-            status = addClassroom(data);
-            if (status === true) {
-                console.log(`Added new teacher`);
+    let return_data = searchClassroom(data);
+    if (return_data.perfect.length === 0) {
+        if (return_data.imperfect.length === 0) {
+            const finish = addNewClassroom(data);
+            if (finish.status === true) {
+                console.log(`Added new classroom with id ${finish.id}`);
                 return res.status(200).json({
-                    msg: `Data received. Added new class with number ${data.classroom}`,
+                    msg: `Data received. Added new classroom with id ${finish.id}`,
                     code: 0o0001
                 });
             }
             else {
+                console.log(`Something went wrong!`);
                 return res.status(200).json({
-                    msg: status.msg,
+                    msg: `Data received. But something went wrong. Cannot add classroom`,
                     code: 0o0002
                 });
             }
-        default:
-            return_data.forEach(el => {
-                if (Number(el.data.classroom) === data.classroom)
-                    return res.status(200).json({
-                        data: return_data,
-                        msg: `Found classroom with same parameters.`,
-                        code: 0o0101
-                    });
-            });
-            status = addClassroom(data);
-            if (status === true)
-                return res.status(200).json({
-                    msg: `Found classroom with similar parameters but with diffrent classroom number. Classroom added!`,
-                    code: 0o0101
-                });
-            else
-                return res.status(200).json({
-                    msg: `Unsuccesfull.`,
-                    code: 0o0002
-                });
-    }
-    ;
-});
-server.delete('/teachers', (req, res) => {
-    const data = req.body.data_to_send;
-    if (!data) {
-        return res.status(400).json({
-            msg: 'Failed to received',
-            code: 0o0002
-        });
-    }
-    else {
-        const teacher = searchTeacher(data);
-        const finish = removeTeacher(teacher);
-        console.log(`Removing teacher finished with status ${finish}`);
-        if (finish === true) {
-            return res.status(200).json({
-                msg: `Data received. Removed teacher ${data.name}, ${data.surname}, ${data.age}, ${data.subject}`,
-                code: 0o0001
-            });
+            ;
         }
         else {
-            console.log('Data received but did not specified method.');
-            return res.status(200).json({
-                msg: 'Data received but did not specified method.',
-                code: 0o0012
+            const { classroom } = data;
+            let match = 0;
+            return_data.imperfect.forEach(el => {
+                el.data['classroom'] === classroom ? match++ : '';
+                if (match === 1) {
+                    return res.status(200).json({
+                        msg: `Data received. This classroom already exist!`,
+                        code: 0o0002
+                    });
+                }
             });
+            const finish = addNewClassroom(data);
+            if (finish.status === true) {
+                console.log(`Added new classroom with id ${finish.id}`);
+                return res.status(200).json({
+                    msg: `Data received. Added new classroom with id ${finish.id}`,
+                    code: 0o0001
+                });
+            }
+            else {
+                console.log(`Something went wrong!`);
+                return res.status(200).json({
+                    msg: `Data received. But something went wrong. Cannot add classroom`,
+                    code: 0o0002
+                });
+            }
         }
-        ;
+    }
+    else {
+        return res.status(200).json({
+            msg: `Data received. This classroom already exist!`,
+            code: 0o0002
+        });
     }
     ;
 });
@@ -222,69 +351,38 @@ server.delete('/classrooms', (req, res) => {
             code: 0o0002
         });
     }
-    else {
-        const classroom = searchClassroom(data);
-        if (classroom.length === 1) {
-            const status = removeClassroom(classroom[0].data.number);
-            if (status === true) {
-                return res.status(200).json({
-                    msg: `Data received. Removed classroom with number ${data.classroom}`,
-                    code: 0o0001
-                });
-            }
-            else {
-                return res.status(200).json({
-                    msg: `Ops! Something went wrong!`,
-                    code: 0o6666
-                });
-            }
-        }
-        else {
-            return res.status(200).json({
-                data: classroom,
-                msg: "Cannot remove teacher. Found few classrooms with similar parameters.",
-                code: 0o0022
-            });
-        }
-    }
-    ;
-});
-server.put('/teachers', (req, res) => {
-    const data = req.body.data_to_send;
-    const data_modify = req.body.data_to_modify;
-    if (!data || !data_modify) {
-        return res.status(400).json({
-            msg: 'Failed to received',
-            code: 0o0002
-        });
-    }
-    ;
-    const teacher = searchTeacher(data);
-    if (teacher.length === 0) {
+    const classroom = searchClassroom(data);
+    if (classroom.perfect.length === 0) {
+        console.log('Data received but did not found classroom.');
         return res.status(200).json({
-            msg: 'Did not found teacher. Please try again or try other search parameters.',
+            msg: 'Data received but did not found classroom.',
             code: 0o0013
         });
     }
-    ;
-    if (teacher.length >= 2) {
+    else if (classroom.perfect.length === 1) {
+        const finish = removeClassroom(classroom.perfect[0]);
+        console.log(`Removing classroom finished with status ${finish.status}`);
+        if (finish.status === true) {
+            const { classroom, main_subject, max_people } = data;
+            return res.status(200).json({
+                msg: `Data received. Removed classroom ${classroom === undefined ? '' : classroom}, ${main_subject === undefined ? '' : main_subject}, ${max_people === undefined ? '' : max_people}.`,
+                code: 0o0001
+            });
+        }
+        else {
+            console.log('Data received but something went wrong!.');
+            return res.status(200).json({
+                msg: 'Data received but something went wrong!',
+                code: 0o0002
+            });
+        }
+        ;
+    }
+    else if (classroom.perfect.length > 1) {
+        console.log('Multiple classrooms with provided data found.');
         return res.status(200).json({
-            msg: 'Cannot modify teacher. Found more than one match.',
+            msg: 'Multiple classrooms with provided data found.',
             code: 0o0014
-        });
-    }
-    ;
-    const state = modifyTeacher(data_modify, teacher[0].id);
-    if (state === false) {
-        return res.status(200).json({
-            msg: 'Unsuccesfull.',
-            code: 0o0002
-        });
-    }
-    else {
-        return res.status(200).json({
-            msg: 'Succesfull.',
-            code: 0o0002
         });
     }
     ;
@@ -300,8 +398,34 @@ server.put('/classrooms', (req, res) => {
     }
     ;
     const classroom = searchClassroom(data);
-    if (classroom.length === 1) {
+    if (classroom.perfect.length === 0) {
+        return res.status(200).json({
+            msg: 'Did not found classroom. Please try again or try other search parameters.',
+            code: 0o0013
+        });
     }
+    ;
+    if (classroom.perfect.length >= 2) {
+        return res.status(200).json({
+            msg: 'Cannot modify classroom. Found more than one match.',
+            code: 0o0014
+        });
+    }
+    ;
+    const finish = modifyClassroom(data_modify, classroom.perfect[0].id);
+    if (finish.status === false) {
+        return res.status(200).json({
+            msg: 'Unsuccesfull.',
+            code: 0o0002
+        });
+    }
+    else {
+        return res.status(200).json({
+            msg: 'Succesfull.',
+            code: 0o0002
+        });
+    }
+    ;
 });
 server.listen(port);
 console.log(`Listening on port ${port}`);

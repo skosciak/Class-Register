@@ -38,7 +38,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     wrapper.classList.toggle('label-checked');
             });
             input_wrapper[i].classList.toggle('label-checked');
-            e.stopPropagation();
+            //e.stopPropagation();
         });
     }
     ;
@@ -145,14 +145,14 @@ function inputs(database, step) {
             const { first_type, second_type, third_type, fourth_type, first_value, second_value, third_value, fourth_value, first_label, second_label, third_label, fourth_label } = text_database.teachers;
             inputs.innerHTML =
                 `${modify_header}
-            <label id="${first}${last_char}" for="first-modify-field" value="${first_value}">${first_label}</label>
-            <input type="${first_type}" class="input write" id="first-modify-field" name="first-field">
-            <label id="${second}${last_char}" for="second-modify-field" value="${second_value}">${second_label}</label>
-            <input type="${second_type}" class="input write" id="second-modify-field" name="second-field">
-            <label id="${third}${last_char}" for="third-modify-field" value="${third_value}">${third_label}</label>
-            <input type="${third_type}" class="input write" id="third-modify-field" name="third-field">
-            <label id="${fourth}${last_char}" for="fourth-modify-field" value="${fourth_value}">${fourth_label}</label>
-            <input type="${fourth_type}" class="input write" id="fourth-modify-field" name="fourth-field">
+            <label id="${first}${last_char}" for="first${modify}-field" value="${first_value}">${first_label}</label>
+            <input type="${first_type}" class="input write" id="first${modify}-field" name="first-field" for-attr="${first_value}">
+            <label id="${second}${last_char}" for="second${modify}-field" value="${second_value}">${second_label}</label>
+            <input type="${second_type}" class="input write" id="second${modify}-field" name="second-field" for-attr="${second_value}">
+            <label id="${third}${last_char}" for="third${modify}-field" value="${third_value}">${third_label}</label>
+            <input type="${third_type}" class="input write" id="third${modify}-field" name="third-field" for-attr="${third_value}">
+            <label id="${fourth}${last_char}" for="fourth${modify}-field" value="${fourth_value}">${fourth_label}</label>
+            <input type="${fourth_type}" class="input write" id="fourth${modify}-field" name="fourth-field" for-attr="${fourth_value}">
             ${button}`;
             break;
         }
@@ -160,12 +160,12 @@ function inputs(database, step) {
             const { first_type, second_type, third_type, first_value, second_value, third_value, first_label, second_label, third_label } = text_database.classrooms;
             inputs.innerHTML =
                 `${modify_header}
-            <label id="first-field-modify-label" for="first-modify-field" value="${first_value}">${first_label}</label>
-            <input type="${first_type}" class="input write" id="first-modify-field" name="first-field">
-            <label id="second-field-modify-label" for="second-modify-field" value="${second_value}">${second_label}</label>
-            <input type="${second_type}" class="input write" id="second-modify-field" name="second-field">
-            <label id="third-field-modify-label" for="third-modify-field" value="${third_value}">${third_label}</label>
-            <input type="${third_type}" class="input write" id="third-modify-field" name="third-field">
+            <label id="first-field${modify}-label" for="first${modify}-field" value="${first_value}">${first_label}</label>
+            <input type="${first_type}" class="input write" id="first${modify}-field" name="first-field" for-attr="${first_value}">
+            <label id="second-field${modify}-label" for="second${modify}-field" value="${second_value}">${second_label}</label>
+            <input type="${second_type}" class="input write" id="second${modify}-field" name="second-field" for-attr="${second_value}">
+            <label id="third-field${modify}-label" for="third${modify}-field" value="${third_value}">${third_label}</label>
+            <input type="${third_type}" class="input write" id="third${modify}-field" name="third-field" for-attr="${third_value}">
             ${button}`;
             break;
         }
@@ -174,13 +174,13 @@ function inputs(database, step) {
                 const { first_type, second_type, third_type, fourth_type, first_value, second_value, third_value, fourth_value, first_label, second_label, third_label, fourth_label } = text_database.subjects;
                 inputs.innerHTML =
                     `${modify_header}
-            <label id="first-field-modify-label" for="first-modify-field" value="${first_value}">${first_label}</label>
-            <input type="${first_type}" class="input write" id="first-modify-field" name="first-field">
-            <label id="second-field-modify-label" for="second-modify-field" value="${second_value}">${second_label}</label>
-            <input type="${second_type}" class="input write" id="second-modify-field" name="second-field">
-            <label id="third-field-modify-label" for="third-modify-field" value="${third_value}">${third_label}</label>
-            <input type="${third_type}" class="input write" id="third-modify-field" name="third-field">
-            <label id="fourth-field-modify-label" for="fourth-modify-field" value="${fourth_value}">${fourth_label}</label>
+            <label id="first-field${modify}-label" for="first${modify}-field" value="${first_value}">${first_label}</label>
+            <input type="${first_type}" class="input write" id="first${modify}-field" name="first-field" for-attr="${first_value}">
+            <label id="second-field${modify}-label" for="second${modify}-field" value="${second_value}">${second_label}</label>
+            <input type="${second_type}" class="input write" id="second${modify}-field" name="second-field" for-attr="${second_value}">
+            <label id="third-field${modify}-label" for="third${modify}-field" value="${third_value}">${third_label}</label>
+            <input type="${third_type}" class="input write" id="third${modify}-field" name="third-field" for-attr="${third_value}">
+            <label id="fourth-field${modify}-label" for="fourth${modify}-field" value="${fourth_value}">${fourth_label}</label>
             <div id="mandatory-wrapper${modify}" class="visible">
                 <p>Nie</p>
                 <div id = "mandatory-button-wrapper${modify}" class="wrapper-off">

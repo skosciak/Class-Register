@@ -3,22 +3,24 @@
 		"id_1": {
 			"name": "adam",
 			"surname": "strzelba",
-			"subjects": [
-				"polish"
+			"subject": [
+				"polish",
+				"math"
 			]
 		},
 		"id_2": {
 			"name": "adam",
 			"surname": "strzelba",
 			"age": 47,
-			"subjects": [
-				"polish"
+			"subject": [
+				"polish",
+				"french"
 			]
 		},
 		"id_3": {
 			"name": "cazary",
 			"surname": "łopiński",
-			"subjects": [
+			"subject": [
 				"math"
 			]
 		},
@@ -26,52 +28,25 @@
 			"name": "arkadiusz",
 			"surname": "milik",
 			"age": 100,
-			"subjects": [
+			"subject": [
 				"francuski"
-			]
-		},
-		"id_7": {
-			"name": "sebastian",
-			"surname": "kcik",
-			"age": 80,
-			"subjects": [
-				"angielski"
-			]
-		},
-		"id_5": {
-			"name": "sebastian",
-			"surname": "kościak",
-			"age": 80
-		},
-		"id_8": {
-			"name": "sebastian",
-			"surname": "kościak",
-			"subjects": [
-				"religia"
 			]
 		},
 		"id_9": {
 			"name": "alan",
 			"surname": "cebula",
 			"age": 15,
-			"subjects": [
+			"subject": [
 				"french",
 				"polish",
 				"math"
-			]
-		},
-		"id_4": {
-			"name": "sebastian",
-			"surname": "kościak",
-			"subjects": [
-				"biologia"
 			]
 		},
 		"id_10": {
 			"name": "sebastian",
 			"surname": "alan",
 			"age": 15,
-			"subjects": [
+			"subject": [
 				"french",
 				"polish"
 			]
@@ -80,6 +55,20 @@
 			"name": "sebastian",
 			"surname": "amar",
 			"age": 15
+		},
+		"id_4": {
+			"name": "andrzej",
+			"surname": "kościak",
+			"age": 56,
+			"subject": [
+				"biologia"
+			]
 		}
+	},
+	"define": {
+		"name": "name",
+		"surname": "surname",
+		"age": "age",
+		"subject": "subject"
 	}
 }
