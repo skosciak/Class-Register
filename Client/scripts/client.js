@@ -57,7 +57,7 @@ class InputClass {
                 ;
             case 'subjects':
                 {
-                    this.subject = document.querySelector("#first-field").value;
+                    this.lesson = document.querySelector("#first-field").value;
                     this.classroom = Number(document.querySelector("#first-field").value);
                     this.lesson_hour = Number(document.querySelector("#second-field").value);
                     this.type = 'input_subjects';
@@ -114,6 +114,8 @@ class InputClass {
             delete this.lesson_hour;
         if (this.mandatory === undefined)
             delete this.mandatory;
+        if (this.lesson === undefined || this.lesson === '')
+            delete this.lesson;
     }
     ;
     modifyMethod() {
@@ -138,7 +140,7 @@ class InputClass {
             case 'subjects':
                 {
                     const mandatory_button_modify = document.querySelector('#mandatory-button-modify');
-                    this.subject = document.querySelector("#first-modify-field").value;
+                    this.lesson = document.querySelector("#first-modify-field").value;
                     this.classroom = Number(document.querySelector("#second-modify-field").value);
                     this.lesson_hour = Number(document.querySelector("#third-modify-field").value);
                     if (mandatory_button_modify.className === 'on')
@@ -168,8 +170,9 @@ function detectStart() {
         else
             console.error('Could not connect to server');
     });
+    //if (btn_user === null) return;
     //Adding event listener to button with id submit
-    btn_user.addEventListener("click", (event_client) => {
+    btn_user === null || btn_user === void 0 ? void 0 : btn_user.addEventListener("click", (event_client) => {
         let database_temp = '';
         const inputs_validation = document.querySelectorAll('#inputs .write');
         let validate;
@@ -225,14 +228,11 @@ function detectStart() {
 }
 //Function clear user inputs
 function inputClear() {
-    const name = document.querySelector("#first-field");
-    const surname = document.querySelector("#second-field");
-    const age = document.querySelector("#third-field");
-    const subjects = document.querySelector("#fourth-field");
-    name.value = '';
-    surname.value = '';
-    age.value = '';
-    subjects.value = '';
+    document.querySelector("#first-field").value = '';
+    document.querySelector("#second-field").value = '';
+    document.querySelector("#third-field").value = '';
+    if (document.querySelector("#fourth-field") !== null)
+        document.querySelector("#fourth-field").value = '';
     return true;
 }
 ;
@@ -316,7 +316,7 @@ function getDataFromServer(data_to_send, data_to_modify) {
             const res = yield sendToServerGet(url);
             const return_data = new ServerData(yield res.json());
             if (return_data.code === 0o0013) {
-                displayMessage(return_data.msg);
+                displayMessage(return_data.msg, 'server_response');
                 return return_data;
             }
             if (return_data.data !== undefined && Array.isArray(return_data.data))
@@ -331,16 +331,16 @@ function getDataFromServer(data_to_send, data_to_modify) {
             const return_data = new ServerData(yield res.json());
             switch (return_data.code) {
                 case 0o0001:
-                    displayMessage(return_data.msg);
+                    displayMessage(return_data.msg, 'server_response');
                     break;
                 case 0o0002:
-                    displayMessage(return_data.msg);
+                    displayMessage(return_data.msg, 'server_response');
                     break;
                 case 0o0011:
-                    displayMessage(return_data.msg);
+                    displayMessage(return_data.msg, 'server_response');
                     break;
                 case 0o0101:
-                    displayMessage(return_data.msg);
+                    displayMessage(return_data.msg, 'server_response');
                     break;
                 default:
                     console.log('Something went wrong.');
@@ -433,12 +433,13 @@ function displayResult(data, id, method) {
     createList(data, id);
 }
 ;
-function displayMessage(msg) {
+function displayMessage(msg, from) {
     const p_element = document.createElement('p');
     const select_div = document.querySelector('#display-status');
     select_div.innerHTML = '';
     select_div.insertAdjacentElement('beforeend', p_element);
     p_element.textContent = msg;
+    p_element.className = from;
 }
 ;
 console.log("Loaded client");

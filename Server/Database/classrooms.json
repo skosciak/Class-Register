@@ -32,6 +32,11 @@
 			"classroom": 2,
 			"main_subject": "sala gimnastyczna",
 			"max_people": 10
+		},
+		"id_8": {
+			"classroom": 123,
+			"main_subject": "deutsh",
+			"max_people": 50
 		}
 	}
 }

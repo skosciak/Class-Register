@@ -11,10 +11,7 @@ export function addNewClassroom(data_from_server) {
     read_file.classrooms[id] = classroom;
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
-    return {
-        status: true,
-        id: id
-    };
+    return { status: true, id: id };
 }
 ;
 export function removeClassroom(data) {
@@ -22,26 +19,20 @@ export function removeClassroom(data) {
     const read_file = openFile(open_file, true);
     if (!searchIfKeyExist(open_file, data.id)) {
         console.warn('Classroom does not exist!');
-        return {
-            status: false,
-            msg: 'Classroom does not exist!'
-        };
+        return { status: false, msg: 'Classroom does not exist!' };
     }
     ;
+    const classroom_delete = read_file.classroom[data.id];
     delete read_file.classroom[data.id];
     const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
-    return { status: true, data: data.data };
+    return { status: true, data: classroom_delete };
 }
 ;
 export function modifyClassroom(data_from_server, id) {
     const classroom = new Classroom(data_from_server);
     classroom.deleteEmpty();
     classroom.toLowerCaseMethod();
-    //for (const [key, value] of Object.entries(classroom)) {
-    //    if (value === undefined || null)
-    //        delete classroom[key];
-    //};
     if ((Object.keys(classroom)).length === 0) {
         console.warn('No values for search!');
         return { status: false, msg: 'No values for search!' };
@@ -71,8 +62,7 @@ export function searchClassroom(data_from_server) {
     classroom.toLowerCaseMethod();
     const open_file = './Server/Database/classrooms.json';
     const read_file = openFile(open_file, true);
-    const matched_classroom = searchForMatch('classroom', read_file.classrooms, data_from_server);
-    return matched_classroom;
+    return searchForMatch('classroom', read_file.classrooms, classroom);
 }
 ;
 console.log("Loaded classrooms module");

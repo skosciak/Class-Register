@@ -1,11 +1,11 @@
+const input = document.querySelector('#inputs.inputs-unselect') as HTMLDivElement;
+input.addEventListener('transitionend', addInputListener);
 
-const input_validation: NodeListOf<HTMLDivElement> = document.querySelectorAll('.input-wrapper');
-input_validation.forEach(el => el.addEventListener('click', () => {
-    const button_database = document.querySelectorAll('.database') as NodeListOf<HTMLInputElement>;
-    button_database.forEach(button => {
-        button.addEventListener('click', (event) => validateInputAfterSubmit(event))
-    });
-}));
+function addInputListener(e: Event) {
+    const btn_submit = document.querySelector('#submit') as HTMLButtonElement;
+    btn_submit.addEventListener('click', function(event) {validateInputAfterSubmit(event)});
+    e.currentTarget!.removeEventListener('transitionend', addInputListener);
+};
 
 function validateInputAfterSubmit(e: any) {
 

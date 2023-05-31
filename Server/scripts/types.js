@@ -99,4 +99,33 @@ export class Teacher {
     ;
 }
 ;
+;
+;
+export class Subject {
+    constructor(subject) {
+        this.lesson = subject.lesson;
+        this.classroom = subject.classroom;
+        this.lesson_hours = subject.lesson_hours;
+        this.mandatory = subject.mandatory;
+    }
+    ;
+    deleteEmpty() {
+        var _a, _b, _c, _d;
+        (_a = this.classroom) !== null && _a !== void 0 ? _a : delete this.classroom;
+        (_b = this.lesson) !== null && _b !== void 0 ? _b : delete this.lesson;
+        (_c = this.lesson_hours) !== null && _c !== void 0 ? _c : delete this.lesson_hours;
+        (_d = this.mandatory) !== null && _d !== void 0 ? _d : delete this.mandatory;
+    }
+    ;
+    toLowerCaseMethod() {
+        if (this.lesson === undefined)
+            this.lesson.toLowerCase();
+        if (this.lesson_hours === undefined)
+            parseInt(String(this.lesson_hours));
+        if (this.classroom === undefined)
+            parseInt(String(this.classroom));
+    }
+    ;
+}
+;
 //# sourceMappingURL=types.js.map

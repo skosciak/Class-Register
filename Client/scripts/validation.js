@@ -1,11 +1,12 @@
 "use strict";
-const input_validation = document.querySelectorAll('.input-wrapper');
-input_validation.forEach(el => el.addEventListener('click', () => {
-    const button_database = document.querySelectorAll('.database');
-    button_database.forEach(button => {
-        button.addEventListener('click', (event) => validateInputAfterSubmit(event));
-    });
-}));
+const input = document.querySelector('#inputs.inputs-unselect');
+input.addEventListener('transitionend', addInputListener);
+function addInputListener(e) {
+    const btn_submit = document.querySelector('#submit');
+    btn_submit.addEventListener('click', function (event) { validateInputAfterSubmit(event); });
+    e.currentTarget.removeEventListener('transitionend', addInputListener);
+}
+;
 function validateInputAfterSubmit(e) {
     function setErrorMsg(el) {
         el.setAttribute('style', 'border-color: rgb(253 15 15)');

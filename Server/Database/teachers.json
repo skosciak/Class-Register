@@ -1,74 +1,12 @@
 {
 	"teachers": {
-		"id_1": {
-			"name": "adam",
-			"surname": "strzelba",
+		"id_5": {
+			"name": "denis",
+			"surname": "subocz",
+			"age": 30,
 			"subject": [
-				"polish",
-				"math"
-			]
-		},
-		"id_2": {
-			"name": "adam",
-			"surname": "strzelba",
-			"age": 47,
-			"subject": [
-				"polish",
-				"french"
-			]
-		},
-		"id_3": {
-			"name": "cazary",
-			"surname": "łopiński",
-			"subject": [
-				"math"
-			]
-		},
-		"id_6": {
-			"name": "arkadiusz",
-			"surname": "milik",
-			"age": 100,
-			"subject": [
-				"francuski"
-			]
-		},
-		"id_9": {
-			"name": "alan",
-			"surname": "cebula",
-			"age": 15,
-			"subject": [
-				"french",
-				"polish",
-				"math"
-			]
-		},
-		"id_10": {
-			"name": "sebastian",
-			"surname": "alan",
-			"age": 15,
-			"subject": [
-				"french",
-				"polish"
-			]
-		},
-		"id_11": {
-			"name": "sebastian",
-			"surname": "amar",
-			"age": 15
-		},
-		"id_4": {
-			"name": "andrzej",
-			"surname": "kościak",
-			"age": 56,
-			"subject": [
-				"biologia"
+				"deutsh"
 			]
 		}
-	},
-	"define": {
-		"name": "name",
-		"surname": "surname",
-		"age": "age",
-		"subject": "subject"
 	}
 }

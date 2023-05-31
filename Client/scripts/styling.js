@@ -38,13 +38,14 @@ window.addEventListener('DOMContentLoaded', () => {
                     wrapper.classList.toggle('label-checked');
             });
             input_wrapper[i].classList.toggle('label-checked');
-            //e.stopPropagation();
         });
     }
     ;
     const observer = new MutationObserver(function (mutation) {
         mutation.forEach(change => {
             let ul = change.addedNodes[0];
+            if (ul === undefined || ul.className === 'server_response')
+                return;
             const element = document.querySelector(`#${ul.id}`);
             element.addEventListener('click', () => {
                 const ul_all = document.querySelectorAll('.search-result');
@@ -112,7 +113,7 @@ function inputs(database, step) {
             second_type: 'number',
             third_type: 'number',
             fourth_type: 'boolean',
-            first_value: 'subject',
+            first_value: 'lesson',
             second_value: 'classroom',
             third_value: 'lesson_hour',
             fourth_value: 'manadtory',

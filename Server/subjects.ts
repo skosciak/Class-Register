@@ -1,63 +1,65 @@
 import * as fs from 'fs';
-import { openFile, searchIfKeyExist } from './reusable';
+import { openFile, returnFirstFreeID, searchForMatch, searchIfKeyExist } from './reusable.js';
+import { Subject, subject } from './types.js';
 
-export function addNewSubject(sub_name: string, sub_classroom: string, sub_lessons: number, mandatory: boolean) {
+export function addNewSubject(data_from_server: subject) {
+    const subject: Subject = new Subject(data_from_server);
+    subject.deleteEmpty();
+    subject.toLowerCaseMethod();
     const open_file = './Server/Database/subjects.json';
     const read_file = openFile(open_file, true);
-    if (searchIfKeyExist(open_file, sub_name) === true) {
-        console.warn(`This subject ${sub_name} already exist!`);
-        return false;
-    };
-    let data = {
-            "class": sub_classroom,
-            "lesson_hours": sub_lessons,
-            "mandatory": mandatory
-    };
-    read_file.school_subjects[sub_name] = data;
+    const id = returnFirstFreeID('subjects');
+    read_file.subjects[id] = subject;
     const update_file = JSON.stringify(read_file, null, 4);
     fs.writeFileSync(open_file, update_file);
-    return true;
+    return { status: true, id: id };
 };
 
-export function deleteSubject(sub_name: string){
+export function removeSubject(data: {id: string, data: object}){
     const open_file = './Server/Database/subjects.json';
     const read_file = openFile(open_file, true);
-    if (searchIfKeyExist(open_file, sub_name) === false) {
-        console.warn(`This subject ${sub_name} does not exist!`);
-        return false;
+    if (!searchIfKeyExist(open_file, data.id)) {
+        console.warn(`Subject does not exist!`);
+        return { status: false, msg: 'Subject does not exist' };
     };
-    delete read_file.school_subjects[sub_name];
+    const subject_delete = read_file.subjects[data.id]
+    delete read_file.subjects[data.id];
     const update_file = JSON.stringify(read_file, null, 4);
     fs.writeFileSync(open_file, update_file);
-    return true;
+    return { status: true, data: subject_delete };
 };
 
-export function modifySubject(sub_name: string, sub_classroom?: string, sub_lessons?: number, mandatory?: boolean){
+export function modifySubject(data_from_server: subject, id?: string){
+    const subject: Subject = new Subject(data_from_server);
+    subject.deleteEmpty();
+    subject.toLowerCaseMethod();
+    if((Object.keys(subject)).length === 0){
+        console.warn('No values for search!');
+        return { status: false, msg: 'No values for search!' };
+    };
     const open_file = './Server/Database/subjects.json';
     const read_file = openFile(open_file, true);
-    if (searchIfKeyExist(open_file, sub_name) === false) {
-        console.warn(`This subject ${sub_name} does not exist! Cannot modify`);
-        return false;
+    if (id !== undefined || null) {
+        for (const key in subject) {
+            read_file.subjects[id][key] = subject[key];
+        };
+    }
+    else {
+        console.warn('No values for update!');
+        return { status: false, msg: 'No values for update!' };
     };
-    let data = {
-        "class": sub_classroom,
-        "lesson_hours": sub_lessons,
-        "mandatory": mandatory
-    };
-    for (const key of Object.keys(data)) {
-        if (data[key] === undefined || null)
-            delete data[key];
-    };
-    if ((Object.keys(data)).length === 0){
-        console.warn("No values to modify!");
-        return false;
-    };
-    for (const key of Object.keys(data))  {
-        read_file.school_subjects[sub_name][key] = data[key];
-    };
-    const update_file = JSON.stringify(read_file, null, 4);
+    const update_file = JSON.stringify(read_file, null, "\t");
     fs.writeFileSync(open_file, update_file);
-    return true;
+    return { status: true, data: read_file.subjects[id] };
 };
 
-console.log("End of file")
+export function searchSubject(data_from_server: subject) {
+    const subject: Subject = new Subject(data_from_server);
+    subject.deleteEmpty();
+    subject.toLowerCaseMethod();
+    const open_file = './Server/Database/teachers.json';
+    const read_file = openFile(open_file, true);
+    return searchForMatch('teachers' ,read_file.teachers, subject);
+};
+
+console.log("Loaded subjects module");

@@ -1,6 +1,8 @@
 const base_url = 'http://localhost:5500';
 
-// Add record when we found similar data
+//Check where lesson and classroom in Subjects are
+//Return button
+//Change CSS height depending on database selected
 
 interface teachersData {
     name: string,
@@ -16,7 +18,7 @@ interface classroomsData {
 };
 
 interface subjectsData {
-    subject: string,
+    lesson: string,
     classroom: number,
     lesson_hours: number,
     mandatory: boolean,
@@ -55,6 +57,7 @@ class InputClass {
     subject?: string;
     classroom?: number;
     max_people?: number;
+    lesson?: string;
     main_subject?: string;
     lesson_hour?: number;
     mandatory?: boolean;
@@ -86,7 +89,7 @@ class InputClass {
             };
 
             case 'subjects': {
-                this.subject = (<HTMLInputElement>document.querySelector("#first-field")).value;
+                this.lesson = (<HTMLInputElement>document.querySelector("#first-field")).value;
                 this.classroom = Number((<HTMLInputElement>document.querySelector("#first-field")).value);
                 this.lesson_hour = Number((<HTMLInputElement>document.querySelector("#second-field")).value);
                 this.type = 'input_subjects';
@@ -131,6 +134,7 @@ class InputClass {
         if (this.main_subject === undefined || this.main_subject === '') delete this.main_subject;
         if (this.lesson_hour === undefined || Number.isNaN(this.lesson_hour)) delete this.lesson_hour;
         if (this.mandatory === undefined) delete this.mandatory;
+        if (this.lesson === undefined || this.lesson === '') delete this.lesson;
     };
 
     modifyMethod() {
@@ -152,7 +156,7 @@ class InputClass {
 
             case 'subjects': {
                 const mandatory_button_modify: HTMLButtonElement =  document.querySelector('#mandatory-button-modify') as HTMLButtonElement;
-                this.subject = (<HTMLInputElement>document.querySelector("#first-modify-field")).value;
+                this.lesson = (<HTMLInputElement>document.querySelector("#first-modify-field")).value;
                 this.classroom = Number((<HTMLInputElement>document.querySelector("#second-modify-field")).value);
                 this.lesson_hour = Number((<HTMLInputElement>document.querySelector("#third-modify-field")).value);
                 if (mandatory_button_modify.className === 'on')
@@ -170,7 +174,6 @@ const database: NodeListOf<HTMLDivElement> = document.querySelectorAll('.input-w
 database.forEach(el => el.addEventListener('click', () => detectStart()));
 
 function detectStart() {
-    console.log("DOM Loaded");
     console.log('Checking connection with server...');
 
     const btn_user = document.querySelector('#submit') as HTMLButtonElement;
@@ -181,9 +184,10 @@ function detectStart() {
         else 
             console.error('Could not connect to server');
     });
+    //if (btn_user === null) return;
 
     //Adding event listener to button with id submit
-    btn_user.addEventListener("click", (event_client) => {
+    btn_user?.addEventListener("click", (event_client) => {
         let database_temp: string = '';
         const inputs_validation: NodeListOf<HTMLInputElement> = document.querySelectorAll('#inputs .write') as NodeListOf<HTMLInputElement>;
         let validate: boolean;
@@ -245,14 +249,11 @@ function detectStart() {
 
 //Function clear user inputs
 function inputClear() {
-    const name = document.querySelector("#first-field") as HTMLInputElement;
-    const surname = document.querySelector("#second-field") as HTMLInputElement;
-    const age = document.querySelector("#third-field") as HTMLInputElement;
-    const subjects = document.querySelector("#fourth-field") as HTMLInputElement;
-    name.value = '';
-    surname.value = '';
-    age.value = '';
-    subjects.value = '';
+    (<HTMLInputElement>document.querySelector("#first-field")).value = '';
+    (<HTMLInputElement>document.querySelector("#second-field")).value = '';
+    (<HTMLInputElement>document.querySelector("#third-field")).value = '';
+    if (document.querySelector("#fourth-field") !== null)
+        (<HTMLInputElement>document.querySelector("#fourth-field")).value = '';
     return true;
 };
 
@@ -331,7 +332,7 @@ async function getDataFromServer(data_to_send: InputClass, data_to_modify?: Inpu
         const res = await sendToServerGet(url);
         const return_data: serverReponse = new ServerData(await res.json());
         if (return_data.code === 0o0013){
-            displayMessage(return_data.msg);
+            displayMessage(return_data.msg, 'server_response');
             return return_data;
         }
         if (return_data.data !== undefined && Array.isArray(return_data.data))
@@ -346,19 +347,19 @@ async function getDataFromServer(data_to_send: InputClass, data_to_modify?: Inpu
         const return_data: serverReponse = new ServerData(await res.json());
         switch (return_data.code) {
             case 0o0001:
-                displayMessage(return_data.msg);
+                displayMessage(return_data.msg, 'server_response');
                 break;
 
             case 0o0002:
-                displayMessage(return_data.msg);
+                displayMessage(return_data.msg, 'server_response');
                 break;
 
             case 0o0011:
-                displayMessage(return_data.msg);
+                displayMessage(return_data.msg, 'server_response');
                 break;
 
             case 0o0101:
-                displayMessage(return_data.msg);
+                displayMessage(return_data.msg, 'server_response');
                 break;
 
             default:
@@ -452,12 +453,13 @@ function displayResult(data: returnData, id: string, method?: string) {
 
 };
 
-function displayMessage(msg: string){
+function displayMessage(msg: string, from: string){
     const p_element = document.createElement('p');
     const select_div = document.querySelector('#display-status') as HTMLDivElement;
     select_div.innerHTML = '';
     select_div.insertAdjacentElement('beforeend', p_element);
     p_element.textContent = msg;
+    p_element.className = from;
 };
 
 console.log("Loaded client");

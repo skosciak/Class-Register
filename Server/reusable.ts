@@ -105,4 +105,10 @@ export function returnFirstFreeID(database: string) {
     }
 };
 
+export function returnInfo(id: string, database: string) {
+    const open_file = `./Server/Database/${database}.json`;
+    const read_file = openFile(open_file, true);
+    return read_file[database][id];
+};
+
 console.log('Loaded reusables module');

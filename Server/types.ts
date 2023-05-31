@@ -143,3 +143,48 @@ export class Teacher {
             this.subject = temp_array;
     };
 };
+
+//
+//SUBJECTS EXPORTS
+//
+
+export interface subject {
+    lesson?: string;
+    classroom?: number;
+    lesson_hours?: number;
+    mandatory?: boolean;
+};
+
+export interface data_subject extends subject {
+    search_type: string
+}; 
+
+export class Subject {
+    lesson?: string;
+    classroom?: number;
+    lesson_hours?: number;
+    mandatory?: boolean;
+
+    constructor(subject: subject) {
+        this.lesson = subject.lesson;
+        this.classroom = subject.classroom;
+        this.lesson_hours = subject.lesson_hours
+        this.mandatory = subject.mandatory
+    };
+
+    deleteEmpty() {
+        this.classroom ?? delete this.classroom;
+        this.lesson ?? delete this.lesson;
+        this.lesson_hours ?? delete this.lesson_hours;
+        this.mandatory ?? delete this.mandatory;
+    };
+
+    toLowerCaseMethod() {
+        if (this.lesson === undefined)
+            this.lesson.toLowerCase();
+        if (this.lesson_hours === undefined) 
+            parseInt(String(this.lesson_hours));
+        if (this.classroom === undefined) 
+            parseInt(String(this.classroom));
+    };
+};

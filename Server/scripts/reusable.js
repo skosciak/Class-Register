@@ -109,5 +109,11 @@ export function returnFirstFreeID(database) {
     }
 }
 ;
+export function returnInfo(id, database) {
+    const open_file = `./Server/Database/${database}.json`;
+    const read_file = openFile(open_file, true);
+    return read_file[database][id];
+}
+;
 console.log('Loaded reusables module');
 //# sourceMappingURL=reusable.js.map
